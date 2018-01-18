@@ -9,13 +9,18 @@ namespace Wibblr.Metrics.Examples
         {
             var eventCollector = new EventCollector(new TextWriterSink(Console.Out), resolutionMillis: 500, flushIntervalMillis: 2000);
 
-            Console.WriteLine("Press some keys; enter to exit");
+            Console.WriteLine("Press some keys; enter to stop recording events");
             char key;
-            while(true)
+            do
             {
                 key = Console.ReadKey(true).KeyChar;
                 eventCollector.RecordEvent(key.ToString());
-            }
+            } while (key != '\r');
+
+            eventCollector.Dispose();
+
+            Console.WriteLine("Press any key to exit");
+            Console.ReadKey();
         }
     }
 }

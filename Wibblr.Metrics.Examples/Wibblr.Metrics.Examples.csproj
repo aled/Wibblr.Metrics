@@ -3,10 +3,12 @@
   <PropertyGroup>
     <OutputType>Exe</OutputType>
     <TargetFramework>netcoreapp2.0</TargetFramework>
+    <StartupObject>Wibblr.Metrics.Examples.SqlServerExample</StartupObject>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Wibblr.Metrics.Core\Wibblr.Metrics.Core.csproj" />
+    <ProjectReference Include="..\Wibblr.Metrics.SqlServer\Wibblr.Metrics.SqlServer.csproj" />
   </ItemGroup>
 
 </Project>

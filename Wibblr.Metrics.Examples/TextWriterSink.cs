@@ -14,17 +14,15 @@ namespace Wibblr.Metrics.Core
             this.writer = writer;
         }
 
-        public void RecordEvents(IDictionary<EventKey, long> events)
+        private string Printable(string s) =>
+            new String(s.SelectMany(c => Char.IsControl(c) ? ("0x" + ((int)c).ToString("X4")).ToCharArray() : new char[] { c }).ToArray());
+
+        public void RecordEvents(IEnumerable<AggregatedEvent> events)
         {
             var lines = events
-                .Select(kv => new { 
-                    Name = kv.Key.name, 
-                    Start = kv.Key.timePeriod.start, 
-                    End = kv.Key.timePeriod.end, 
-                    Count = kv.Value })
-                .OrderBy(x => x.Start)
-                .ThenBy(x => x.Name)
-                .Select(x => $"{x.Start.ToString("mm:ss.fff")} - {x.End.ToString(x.End.ToString("mm:ss.fff"))} {x.Name} {x.Count}");
+                .OrderBy(x => x.startTime)
+                .ThenBy(x => x.name)
+                .Select(x => $"{x.startTime.ToString("mm:ss.fff")} - {x.endTime.ToString("mm:ss.fff")} {Printable(x.name)} {x.count}");
 
             foreach (var line in lines)
                 writer.WriteLine(line);

@@ -15,7 +15,7 @@ namespace Wibblr.Metrics.Core
         public DateTime Current { get => DateTime.UtcNow; }
 
         /// <summary>
-        /// Initialize the specified callback.
+        /// Specify an action to be called later.
         /// </summary>
         /// <param name="callback">Callback.</param>
         public void SetDelayedAction(Action callback)
@@ -25,7 +25,7 @@ namespace Wibblr.Metrics.Core
         }
 
         /// <summary>
-        /// Executes the after delay.
+        /// Executes the pre-specified action after a configurable delay.
         /// </summary>
         /// <param name="periodMillis">Period millis.</param>
         public void ExecuteAfterDelay(int periodMillis) => timer.Change(periodMillis, Timeout.Infinite);

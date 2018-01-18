@@ -7,17 +7,15 @@ namespace Wibblr.Metrics.Core
     {
         public Dictionary<EventKey, long> Events { get; } = new Dictionary<EventKey, long>();
 
-        public void RecordEvents(IDictionary<EventKey, long> events)
+        public void RecordEvents(IEnumerable<AggregatedEvent> events)
         {
-            foreach (var kv in events)
+            foreach (var e in events)
             {
-                var key = kv.Key;
-                var count = kv.Value;
-
+                var key = new EventKey(e.name, e.startTime, e.endTime);
                 if (Events.ContainsKey(key))
-                    Events[key] = Events[key] + count;
+                    Events[key] = Events[key] + e.count;
                 else
-                    Events[key] = count;
+                    Events[key] = e.count;
             }
         }
     }

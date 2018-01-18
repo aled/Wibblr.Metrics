@@ -7,10 +7,10 @@ namespace Wibblr.Metrics.Core
         public string name;
         public TimePeriod timePeriod;
 
-        public EventKey(string name, DateTime start, DateTime end)
+        public EventKey(string name, DateTime startTime, DateTime endTime)
         {
             this.name = name;
-            timePeriod = new TimePeriod(start, end);
+            timePeriod = new TimePeriod(startTime, endTime);
         }
     }
 }

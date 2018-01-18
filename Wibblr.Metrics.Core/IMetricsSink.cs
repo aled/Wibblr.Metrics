@@ -5,6 +5,6 @@ namespace Wibblr.Metrics.Core
 {
     public interface IMetricsSink
     {
-        void RecordEvents(IDictionary<EventKey, long> events);
+        void RecordEvents(IEnumerable<AggregatedEvent> events);
     }
 }

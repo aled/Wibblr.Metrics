@@ -80,7 +80,7 @@ namespace Wibblr.Metrics.Core
         private void Flush()
         {
             bool isDelayerCancelled = clock.IsDelayedActionCancelled();
-            var copy = new Dictionary<EventKey, long>();
+            var copy = new List<AggregatedEvent>();
 
             var currentTimePeriod = clock.Current.Seconds();
 
@@ -101,7 +101,7 @@ namespace Wibblr.Metrics.Core
                     // later than the current timePeriod.
                     if (isDelayerCancelled || eventKey.timePeriod.end <= currentTimePeriod)
                     {
-                        copy[eventKey] = events[eventKey];
+                        copy.Add(new AggregatedEvent { name = eventKey.name, startTime = eventKey.timePeriod.start, endTime = eventKey.timePeriod.end, count = events[eventKey] });
                         events.Remove(eventKey);
                     }    
                 }
