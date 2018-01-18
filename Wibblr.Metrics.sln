@@ -1,9 +1,12 @@
-
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2012
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Metrics.Core", "Wibblr.Metrics.Core\Wibblr.Metrics.Core.csproj", "{EEB92ACA-5EAB-48A0-90F1-0AA4F45886AE}"
+# Visual Studio 15
+VisualStudioVersion = 15.0.27004.2005
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.Core", "Wibblr.Metrics.Core\Wibblr.Metrics.Core.csproj", "{EEB92ACA-5EAB-48A0-90F1-0AA4F45886AE}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Metrics.Core.Tests", "Wibblr.Metrics.Core.Tests\Wibblr.Metrics.Core.Tests.csproj", "{976BF913-3D75-4843-B6BB-EAB34C5D62CE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.Core.Tests", "Wibblr.Metrics.Core.Tests\Wibblr.Metrics.Core.Tests.csproj", "{976BF913-3D75-4843-B6BB-EAB34C5D62CE}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Metrics.Examples", "Wibblr.Metrics.Examples\Wibblr.Metrics.Examples.csproj", "{02442FA6-D5F7-4222-9E23-84546AD9152F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -19,5 +22,15 @@ Global
 		{976BF913-3D75-4843-B6BB-EAB34C5D62CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{976BF913-3D75-4843-B6BB-EAB34C5D62CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{976BF913-3D75-4843-B6BB-EAB34C5D62CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{02442FA6-D5F7-4222-9E23-84546AD9152F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{02442FA6-D5F7-4222-9E23-84546AD9152F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{02442FA6-D5F7-4222-9E23-84546AD9152F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{02442FA6-D5F7-4222-9E23-84546AD9152F}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {7ABFEEF5-5FBB-43BC-AF43-15DB266D1E28}
 	EndGlobalSection
 EndGlobal

@@ -14,7 +14,7 @@ namespace Wibblr.Metrics.Core
             this.writer = writer;
         }
 
-        public void RecordEvents(IDictionary<EventKey, int> events)
+        public void RecordEvents(IDictionary<EventKey, long> events)
         {
             var lines = events
                 .Select(kv => new { 
@@ -24,10 +24,12 @@ namespace Wibblr.Metrics.Core
                     Count = kv.Value })
                 .OrderBy(x => x.Start)
                 .ThenBy(x => x.Name)
-                .Select(x => $"{x.Start.ToIsoString()} - {x.End.ToString("ss")} {x.Name} {x.Count}");
+                .Select(x => $"{x.Start.ToString("mm:ss.fff")} - {x.End.ToString(x.End.ToString("mm:ss.fff"))} {x.Name} {x.Count}");
 
             foreach (var line in lines)
                 writer.WriteLine(line);
+
+            writer.WriteLine("---");
 
             writer.Flush();
         }

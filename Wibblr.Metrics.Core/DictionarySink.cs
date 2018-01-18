@@ -7,7 +7,7 @@ namespace Wibblr.Metrics.Core
     {
         public Dictionary<EventKey, long> Events { get; } = new Dictionary<EventKey, long>();
 
-        public void RecordEvents(IDictionary<EventKey, int> events)
+        public void RecordEvents(IDictionary<EventKey, long> events)
         {
             foreach (var kv in events)
             {
