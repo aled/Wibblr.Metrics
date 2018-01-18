@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
-using System.Threading;
 
 namespace Wibblr.Metrics.Core
 {
@@ -14,13 +13,13 @@ namespace Wibblr.Metrics.Core
         private IMetricsSink sink;
 
         // These are overridden for unit testing
-        private ITimer timer;
-        private IDateTime dateTime;
+        private IDelayer delayer;
+        private IClock clock;
 
         private int resolutionMillis = 1000;
         private int flushIntervalMillis = 3000;
 
-        private DateTime flushTimestamp;
+        private DateTime nextFlushTime = DateTime.MinValue;
 
         // Value does not need to be a long, as a new key will be generated each second
         private Dictionary<EventKey, int> events = new Dictionary<EventKey, int>();
@@ -31,22 +30,20 @@ namespace Wibblr.Metrics.Core
         /// Initializes a new instance of the <see cref="T:Wibblr.Metrics.Core.EventCollector"/> class.
         /// </summary>
         /// <param name="sink">Sink.</param>
-        /// <param name="timer">Timer.</param>
-        /// <param name="dateTime">Datetime.</param>
+        /// <param name="delayer">Timer.</param>
+        /// <param name="clock">Clock.</param>
         /// <param name="resolutionMillis">Resolution millis.</param>
         /// <param name="flushIntervalMillis">Flush interval millis.</param>
-        internal EventCollector(IMetricsSink sink, ITimer timer, IDateTime dateTime, int resolutionMillis, int flushIntervalMillis)
+        internal EventCollector(IMetricsSink sink, IDelayer delayer, IClock clock, int resolutionMillis, int flushIntervalMillis)
         {
             this.sink = sink;
-            this.timer = timer;
-            this.dateTime = dateTime;
+            this.delayer = delayer;
+            this.clock = clock;
             this.resolutionMillis = resolutionMillis;
             this.flushIntervalMillis = flushIntervalMillis;
 
-            flushTimestamp = dateTime.CurrentTimestamp().TruncateToSecond();
-
-            timer.Initialize(Flush);
-            timer.Start(flushIntervalMillis);
+            delayer.Initialize(Flush);
+            delayer.ExecuteAfterDelay(flushIntervalMillis);
         }
 
         /// <summary>
@@ -55,7 +52,7 @@ namespace Wibblr.Metrics.Core
         /// <param name="sink">The sink to write the events to.</param>
         /// <param name="flushIntervalMillis">Batch will be flushed when this amount of time has passed</param>
         public EventCollector(IMetricsSink sink, int resolutionMillis = 1000, int flushIntervalMillis = 5000)
-            : this(sink, new SystemTimer(), new SystemDateTime(), resolutionMillis, flushIntervalMillis)
+            : this(sink, new Delayer(), new Clock(), resolutionMillis, flushIntervalMillis)
         {  
         }
 
@@ -65,7 +62,7 @@ namespace Wibblr.Metrics.Core
         /// <param name="name">Name.</param>
         public void RecordEvent(string name)
         {
-            var startTime = dateTime.CurrentTimestamp().TruncateToSecond();
+            var startTime = clock.CurrentSeconds;
             var endTime = startTime.AddSeconds(1);
             var key = new EventKey(name, startTime, endTime);
                 
@@ -83,19 +80,27 @@ namespace Wibblr.Metrics.Core
         /// </summary>
         private void Flush()
         {
-            bool isTimerCancelled = timer.IsCancelled();
+            bool isDelayerCancelled = delayer.IsCancelled();
             var copy = new Dictionary<EventKey, int>();
 
-            var currentTimePeriod = dateTime.CurrentTimestamp().TruncateToSecond();
+            var currentTimePeriod = clock.CurrentSeconds;
 
             lock (lockObject)
             {
+                // This makes sure that the flush is exactly aligned to the start of the minute,
+                // i.e. flush is done at 0, 5, 10 seconds and not 1, 6, 11.
+                if (nextFlushTime == DateTime.MinValue)
+                    nextFlushTime = clock.Current.Truncate(TimeSpan.TicksPerMillisecond * flushIntervalMillis);
+
+                nextFlushTime = nextFlushTime.AddMilliseconds(flushIntervalMillis);
+                
                 foreach (var eventKey in events.Keys.ToList())
                 {
-                    // Only take events before the current second
+                    // Only take events before the current second (unless 
+                    // the delayer is cancelled, i.e. there will be no more flushes)
                     // timePeriod.end is exclusive; so all new events will have an end
                     // later than the current timePeriod.
-                    if (isTimerCancelled || eventKey.timePeriod.end <= currentTimePeriod)
+                    if (isDelayerCancelled || eventKey.timePeriod.end <= currentTimePeriod)
                     {
                         copy[eventKey] = events[eventKey];
                         events.Remove(eventKey);
@@ -106,21 +111,21 @@ namespace Wibblr.Metrics.Core
             if (copy != null && copy.Any())
                 sink.RecordEvents(copy);
 
-            if (!isTimerCancelled)
-            {
-                flushTimestamp = flushTimestamp.AddMilliseconds(flushIntervalMillis);
-                var delay = (int)flushTimestamp.Subtract(dateTime.CurrentTimestamp()).TotalMilliseconds;
+            if (!isDelayerCancelled)
+            {   
+                var flushDelayMillis = (int)nextFlushTime.Subtract(clock.Current).TotalMilliseconds;
 
-                if (delay < 0)
-                    delay = 0;
+                // if the next flush time has already passed, just miss it out and wait until the next flush time.
+                while (flushDelayMillis < 0)
+                    flushDelayMillis += flushIntervalMillis;
                 
-                timer.Start(delay);    
+                delayer.ExecuteAfterDelay(flushDelayMillis);    
             }
         }
 
         public void Dispose() 
         {
-            timer.Cancel();
+            delayer.Cancel();
             Flush();
         }
     }

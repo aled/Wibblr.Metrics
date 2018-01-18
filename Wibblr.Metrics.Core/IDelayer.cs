@@ -2,7 +2,7 @@
 
 namespace Wibblr.Metrics.Core
 {
-    public interface ITimer
+    public interface IDelayer
     {
         /// <summary>
         /// Initialize the timer.
@@ -14,7 +14,7 @@ namespace Wibblr.Metrics.Core
         /// Start the timer; wait for a period of time, and then execute the callback.
         /// </summary>
         /// <param name="periodMillis">Number of milliseconds to wait.</param>
-        void Start(int periodMillis);
+        void ExecuteAfterDelay(int periodMillis);
 
         /// <summary>
         /// Cancel the timer. Waits for all scheduled callbacks to be executed before returning.
@@ -22,7 +22,7 @@ namespace Wibblr.Metrics.Core
         void Cancel();
 
         /// <summary>
-        /// Check if timer is cancelled. No further callbacks will be issued if this is true.
+        /// Check if delayer is cancelled. No further callbacks will be issued if this is true.
         /// </summary>
         /// <returns><c>true</c>, if cancelled, <c>false</c> otherwise.</returns>
         bool IsCancelled();
