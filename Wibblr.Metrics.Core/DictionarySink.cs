@@ -5,17 +5,17 @@ namespace Wibblr.Metrics.Core
 {
     public class DictionarySink : IMetricsSink
     {
-        public Dictionary<EventKey, long> Events { get; } = new Dictionary<EventKey, long>();
+        public Dictionary<Metric, long> Counters { get; } = new Dictionary<Metric, long>();
 
-        public void RecordEvents(IEnumerable<AggregatedEvent> events)
+        public void Flush(IEnumerable<AggregatedCounter> counters)
         {
-            foreach (var e in events)
+            foreach (var c in counters)
             {
-                var key = new EventKey(e.name, e.startTime, e.endTime);
-                if (Events.ContainsKey(key))
-                    Events[key] = Events[key] + e.count;
+                var key = new Metric(c.name, c.window);
+                if (Counters.ContainsKey(key))
+                    Counters[key] = Counters[key] + c.count;
                 else
-                    Events[key] = e.count;
+                    Counters[key] = c.count;
             }
         }
     }

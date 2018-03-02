@@ -10,18 +10,16 @@ namespace Wibblr.Metrics.Core.Tests
 
         private bool Cancelled { get; set; } = false;
         private bool Started { get; set; } = false;
-        private int PeriodMillis { get; set; }
 
         private Action callback;
-        private DateTime startTime;
+        private DateTime earliestExecutionTime;
 
         public void SetDelayedAction(Action callback) => this.callback = callback;
 
-        public void ExecuteAfterDelay(int periodMillis)
+        public void ExecuteAfterDelay(TimeSpan tickResolution)
         {
             Started = true;
-            PeriodMillis = periodMillis;
-            startTime = Current;
+            earliestExecutionTime = Current.RoundUp(tickResolution);
         }
 
         public void CancelDelayedAction() => Cancelled = true;
@@ -30,11 +28,10 @@ namespace Wibblr.Metrics.Core.Tests
 
         public void ClockChanged()
         {
-            if (Started && !Cancelled && Current >= startTime.AddMilliseconds(PeriodMillis))
+            if (Started && !Cancelled && Current >= earliestExecutionTime)
             {
                 var task = new TaskFactory().StartNew(callback);
                 task.Wait();
-                startTime = Current;
             }
         }
 
@@ -44,9 +41,9 @@ namespace Wibblr.Metrics.Core.Tests
             ClockChanged();
         }
 
-        public void AddMillis(int millis)
+        public void Add(TimeSpan timeSpan)
         {
-            Current = Current.AddMilliseconds(millis);
+            Current = Current.Add(timeSpan);
         }
     }
 }

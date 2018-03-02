@@ -7,17 +7,18 @@ namespace Wibblr.Metrics.Examples
     {
         static void Main(string[] args)
         {
-            var eventCollector = new EventCollector(new TextWriterSink(Console.Out), resolutionMillis: 500, flushIntervalMillis: 2000);
+            var sink = new TextWriterSink(Console.Out);
+            var counterCollector = new MetricsCollector(sink, TimeSpan.FromMilliseconds(1000), TimeSpan.FromSeconds(1));
 
             Console.WriteLine("Press some keys; enter to stop recording events");
             char key;
             do
             {
                 key = Console.ReadKey(true).KeyChar;
-                eventCollector.RecordEvent(key.ToString());
-            } while (key != '\r');
+                counterCollector.IncrementCounter(key.ToString());
+            } while (key != '\r' && key != '\n');  // \r = windows; \n = mac
 
-            eventCollector.Dispose();
+            counterCollector.Dispose();
 
             Console.WriteLine("Press any key to exit");
             Console.ReadKey();

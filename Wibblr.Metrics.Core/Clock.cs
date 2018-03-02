@@ -25,10 +25,20 @@ namespace Wibblr.Metrics.Core
         }
 
         /// <summary>
-        /// Executes the pre-specified action after a configurable delay.
+        /// Executes the pre-specified action a delay. The actual delay is 
+        /// calculated so the action executes at the next 'tick'
         /// </summary>
-        /// <param name="periodMillis">Period millis.</param>
-        public void ExecuteAfterDelay(int periodMillis) => timer.Change(periodMillis, Timeout.Infinite);
+        /// <param name="tickResolution">Tick resolution.</param>
+        public void ExecuteAfterDelay(TimeSpan tickResolution) 
+        {
+            var now = Current;
+            var delay = now.RoundUp(tickResolution).Subtract(now).TotalMilliseconds;
+
+            if (delay > int.MaxValue)
+                delay = int.MaxValue;
+
+            timer.Change((int)delay, Timeout.Infinite);    
+        }
 
         /// <summary>
         /// Cancel the timer. Waits for all scheduled callbacks to be executed before returning.
@@ -47,7 +57,7 @@ namespace Wibblr.Metrics.Core
         }
 
         /// <summary>
-        /// Check if delayer is cancelled. No further callbacks will be issued if this is true.
+        /// Check if delayedAction is cancelled. No further callbacks will be issued if this is true.
         /// </summary>
         /// <returns><c>true</c>, if cancelled, <c>false</c> otherwise.</returns>
         public bool IsDelayedActionCancelled() => isCancelled.WaitOne(0);

@@ -11,4 +11,8 @@
   <ItemGroup>
     <Folder Include="Properties\" />
   </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="IMeasurementCollector.cs" />
+    <Compile Remove="Histogram.cs" />
+  </ItemGroup>
 </Project>

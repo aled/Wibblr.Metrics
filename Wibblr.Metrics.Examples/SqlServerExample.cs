@@ -12,14 +12,14 @@ namespace Wibblr.Metrics.Examples
             var tableName = "MetricsEvent";
 
             var sink = new SqlServerSink(connectionString, tableName);
-            using (var eventCollector = new EventCollector(sink, resolutionMillis: 500, flushIntervalMillis: 2000))
+            using (var counterCollector = new MetricsCollector(sink, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(2000)))
             {
                 Console.WriteLine("Press some keys; enter to exit");
                 char key;
                 do
                 {
                     key = Console.ReadKey(true).KeyChar;
-                    eventCollector.RecordEvent(key.ToString());
+                    counterCollector.IncrementCounter(key.ToString());
                 } while (key != '\r');
             }
         }

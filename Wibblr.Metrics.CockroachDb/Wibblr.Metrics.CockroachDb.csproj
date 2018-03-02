@@ -1,0 +1,14 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>netstandard2.0</TargetFramework>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Wibblr.Metrics.Core\Wibblr.Metrics.Core.csproj" />
+    <ProjectReference Include="..\Wibblr.Collections\Wibblr.Collections.csproj" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="Npgsql" Version="3.2.6" />
+  </ItemGroup>
+</Project>

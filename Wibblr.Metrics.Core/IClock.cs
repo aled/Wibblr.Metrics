@@ -18,8 +18,8 @@ namespace Wibblr.Metrics.Core
         /// <summary>
         /// Start the timer; wait for a period of time, and then execute the callback.
         /// </summary>
-        /// <param name="periodMillis">Number of milliseconds to wait.</param>
-        void ExecuteAfterDelay(int periodMillis);
+        /// <param name="delay">time to wait.</param>
+        void ExecuteAfterDelay(TimeSpan delay);
 
         /// <summary>
         /// Cancel the timer. Waits for all scheduled callbacks to be executed before returning.

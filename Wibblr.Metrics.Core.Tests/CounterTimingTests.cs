@@ -6,7 +6,7 @@ using Xunit;
 
 namespace Wibblr.Metrics.Core.Tests
 {
-    public class TimingTests
+    public class CounterTimingTests
     {
         [Fact]
         public void EventShouldFlushAtMultiplesOf5000ms()
@@ -16,19 +16,19 @@ namespace Wibblr.Metrics.Core.Tests
 
             var sink = new DictionarySink();
 
-            using (var e = new EventCollector(sink, clock, 1000, 5000))
+            using (var e = new MetricsCollector(sink, clock, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5)))
             {
                 clock.Set("12:00:04.000");
-                e.RecordEvent("myevent");
+                e.IncrementCounter("myevent");
 
                 // should not fire event yet
                 clock.Set("12:00:04.999");
-                Assert.Equal(0, sink.Events.Count);
+                Assert.Equal(0, sink.Counters.Count);
 
                 clock.Set("12:00:05.000");
 
                 // should now fire event on another thread and then return
-                Assert.Equal(1, sink.Events.Count);
+                Assert.Equal(1, sink.Counters.Count);
             }
         }
 
@@ -39,7 +39,7 @@ namespace Wibblr.Metrics.Core.Tests
             clock.Set("11:00:00.000");
             var sink = new DictionarySink();
 
-            using (var e = new EventCollector(sink, clock, 1000, 5000))
+            using (var e = new MetricsCollector(sink, clock, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5)))
             {
                 clock.Set("12:00:01.500");
 
@@ -49,14 +49,14 @@ namespace Wibblr.Metrics.Core.Tests
                 {
                     Parallel.For(0, 10000, options, (j, s) =>
                     {
-                        e.RecordEvent($"myevent-{Thread.CurrentThread.ManagedThreadId}");
+                        e.IncrementCounter($"myevent-{Thread.CurrentThread.ManagedThreadId}");
                     });
-                    clock.AddMillis(1000);
+                    clock.Add(TimeSpan.FromSeconds(1));
                 }
             }
 
             // Dispose method on event collect ensures all events are flushed immediately
-            Assert.Equal(100000, sink.Events.Values.Sum());
+            Assert.Equal(100000, sink.Counters.Values.Sum());
         }
     }
 }

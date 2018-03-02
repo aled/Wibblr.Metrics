@@ -16,7 +16,7 @@ namespace Wibblr.Metrics.SqlServer
         private string connectionString;
         private string tableName;
 
-        private DataTable dataTable;
+        internal DataTable dataTable;
         private object dataTableLock = new object();
 
         public SqlServerSink(string connectionString, string tableName)
@@ -31,11 +31,11 @@ namespace Wibblr.Metrics.SqlServer
             dataTable.Columns.Add("Count", typeof(long));
         }
 
-        public void RecordEvents(IEnumerable<AggregatedEvent> events)
+        public void Flush(IEnumerable<AggregatedCounter> counters)
         {
             lock (dataTableLock)
             {
-                foreach (var e in events)
+                foreach (var c in counters)
                 {
                     // Throw away new rows when we have too many queued, so that we
                     // don't consume unlimited memory if the database is down.
@@ -44,10 +44,10 @@ namespace Wibblr.Metrics.SqlServer
                         break;
 
                     var row = dataTable.NewRow();
-                    row["EventName"] = e.name;
-                    row["StartTime"] = e.startTime;
-                    row["EndTime"] = e.endTime;
-                    row["Count"] = e.count;
+                    row["CounterName"] = c.name;
+                    row["StartTime"] = c.window.start;
+                    row["EndTime"] = c.window.start.Add(c.window.size);
+                    row["Count"] = c.count;
                     dataTable.Rows.Add(row);
                 }
 

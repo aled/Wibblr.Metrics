@@ -17,12 +17,12 @@ namespace Wibblr.Metrics.Core
         private string Printable(string s) =>
             new String(s.SelectMany(c => Char.IsControl(c) ? ("0x" + ((int)c).ToString("X4")).ToCharArray() : new char[] { c }).ToArray());
 
-        public void RecordEvents(IEnumerable<AggregatedEvent> events)
+        public void Flush(IEnumerable<AggregatedCounter> events)
         {
             var lines = events
-                .OrderBy(x => x.startTime)
+                .OrderBy(x => x.window.start)
                 .ThenBy(x => x.name)
-                .Select(x => $"{x.startTime.ToString("mm:ss.fff")} - {x.endTime.ToString("mm:ss.fff")} {Printable(x.name)} {x.count}");
+                .Select(x => $"{x.window.start.ToString("mm:ss.fff")} - {x.window.start.Add(x.window.size).ToString("mm:ss.fff")} {Printable(x.name)} {x.count}");
 
             foreach (var line in lines)
                 writer.WriteLine(line);
