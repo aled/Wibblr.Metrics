@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text;
 
 namespace Wibblr.Collections
 {
@@ -13,7 +13,7 @@ namespace Wibblr.Collections
         private int maxCapacity;
         private int batchSize;
 
-        private LinkedList<List<T>> buffer;
+        private LinkedList<List<T>> batchList;
         private int count;
 
         public BatchedQueue(int batchSize, int maxCapacity)
@@ -21,7 +21,7 @@ namespace Wibblr.Collections
             this.batchSize = batchSize;
             this.maxCapacity = maxCapacity;
 
-            buffer = new LinkedList<List<T>>();
+            batchList = new LinkedList<List<T>>();
         }
 
         // Add item to back of queue. If already full, this item is
@@ -31,10 +31,10 @@ namespace Wibblr.Collections
             if (count < maxCapacity)
             {
                 count++;
-                if (buffer.Count == 0 || buffer.Last.Value.Count >= batchSize)
-                    buffer.AddLast(new List<T>());
+                if (batchList.Count == 0 || batchList.Last.Value.Count >= batchSize)
+                    batchList.AddLast(new List<T>());
                 
-                buffer.Last.Value.Add(item);
+                batchList.Last.Value.Add(item);
                 return true;
             }
             return false;
@@ -57,19 +57,22 @@ namespace Wibblr.Collections
         // back of the queue are discarded.
         public void EnqueueToFront(List<T> batch)
         {
-            buffer.AddFirst(batch);
+            batchList.AddFirst(batch);
             count += batch.Count;
 
             while (count > maxCapacity)
             {
                 int itemsToDelete = count - maxCapacity;
-                if (itemsToDelete >= buffer.Last.Value.Count)
+                if (itemsToDelete >= batchList.Last.Value.Count)
                 {
-                    buffer.RemoveLast();
+                    count -= batchList.Last.Value.Count();
+                    batchList.RemoveLast();
+
                 }
                 else
                 {
-                    buffer.Last.Value.DropLast(itemsToDelete);
+                    var numItemsDropped = batchList.Last.Value.DropLast(itemsToDelete);
+                    count -= numItemsDropped;
                     break;
                 }
             }
@@ -79,10 +82,28 @@ namespace Wibblr.Collections
 
         public List<T> DequeueBatch()
         {
-            var batch = buffer.First.Value;
-            buffer.RemoveFirst();
+            var batch = batchList.First.Value;
+            batchList.RemoveFirst();
             count -= batch.Count();
+
+            if (batchList.Count == 0)
+                batchList.AddFirst(new List<T>());
+
             return batch;
+        }
+
+        public string AsString()
+        {
+            var s = new StringBuilder();
+            s.Append("[");
+            foreach (var batch in batchList)
+            {
+                s.Append("(");
+                s.Append(string.Join(",", batch));
+                s.Append(")");
+            }
+            s.Append("]");
+            return s.ToString();
         }
     }
 }

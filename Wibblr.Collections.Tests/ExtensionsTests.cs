@@ -1,41 +1,42 @@
-using System;
 using System.Collections.Generic;
-using System.Linq;
-using Xunit;
 using FluentAssertions;
+using Xunit;
+using static Wibblr.Collections.Tests.ListBuilder<int>;
 
 namespace Wibblr.Collections.Tests
 {
+    public static class ExtentionsTestsExtenstions
+    {
+        
+        public static List<int> WithDroppedLast(this List<int> items, int n)
+        {
+            items.DropLast(n);
+            return items;
+        }
+    }
+
     public class ExtensionsTests
     {
-        private List<int> L(params int[] values) => values.ToList();
-
-        private List<int> Drop(List<int> list, int drop) {
-            list.DropLast(drop);
-            return list;
-        }
-
         [Fact]
         public void Test1()
         {
-            L(1, 2, 3).DropLast(0).Should().BeEquivalentTo(L(1, 2, 3));
-            L(1, 2, 3).DropLast(1).Should().BeEquivalentTo(L(1, 2));
-            L(1, 2, 3).DropLast(2).Should().BeEquivalentTo(L(1));
-            L(1, 2, 3).DropLast(3).Should().BeEquivalentTo(L());
-            L(1, 2, 3).DropLast(4).Should().BeEquivalentTo(L());
+            L(1, 2, 3).WithDroppedLast(0).Should().BeEquivalentTo(L(1, 2, 3));
+            L(1, 2, 3).WithDroppedLast(1).Should().BeEquivalentTo(L(1, 2));
+            L(1, 2, 3).WithDroppedLast(2).Should().BeEquivalentTo(L(1));
+            L(1, 2, 3).WithDroppedLast(3).Should().BeEquivalentTo(L());
+            L(1, 2, 3).WithDroppedLast(4).Should().BeEquivalentTo(L());
 
-            L(1, 2).DropLast(0).Should().BeEquivalentTo(L(1, 2));
-            L(1, 2).DropLast(1).Should().BeEquivalentTo(L(1));
-            L(1, 2).DropLast(2).Should().BeEquivalentTo(L());
-            L(1, 2).DropLast(3).Should().BeEquivalentTo(L());
+            L(1, 2).WithDroppedLast(0).Should().BeEquivalentTo(L(1, 2));
+            L(1, 2).WithDroppedLast(1).Should().BeEquivalentTo(L(1));
+            L(1, 2).WithDroppedLast(2).Should().BeEquivalentTo(L());
+            L(1, 2).WithDroppedLast(3).Should().BeEquivalentTo(L());
 
-            L(1).DropLast(0).Should().BeEquivalentTo(L(1));
-            L(1).DropLast(1).Should().BeEquivalentTo(L());
-            L(1).DropLast(2).Should().BeEquivalentTo(L());
+            L(1).WithDroppedLast(0).Should().BeEquivalentTo(L(1));
+            L(1).WithDroppedLast(1).Should().BeEquivalentTo(L());
+            L(1).WithDroppedLast(2).Should().BeEquivalentTo(L());
 
-            L().DropLast(0).Should().BeEquivalentTo(L());
-            L().DropLast(1).Should().BeEquivalentTo(L());
-
+            L().WithDroppedLast(0).Should().BeEquivalentTo(L());
+            L().WithDroppedLast(1).Should().BeEquivalentTo(L());
         }
     }
 }
