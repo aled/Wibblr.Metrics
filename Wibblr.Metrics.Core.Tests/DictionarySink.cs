@@ -18,5 +18,10 @@ namespace Wibblr.Metrics.Core.Tests
                     Counters[key] = c.count;
             }
         }
+
+        public void Flush(IEnumerable<WindowedBucket> buckets)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

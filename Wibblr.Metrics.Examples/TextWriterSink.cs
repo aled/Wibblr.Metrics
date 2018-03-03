@@ -22,7 +22,23 @@ namespace Wibblr.Metrics.Core
             var lines = events
                 .OrderBy(x => x.window.start)
                 .ThenBy(x => x.name)
-                .Select(x => $"{x.window.start.ToString("mm:ss.fff")} - {x.window.start.Add(x.window.size).ToString("mm:ss.fff")} {Printable(x.name)} {x.count}");
+                .Select(x => $"{x.window.start.ToString("mm:ss.fff")} - {x.window.end.ToString("mm:ss.fff")} {Printable(x.name)} {x.count}");
+
+            foreach (var line in lines)
+                writer.WriteLine(line);
+
+            writer.WriteLine("---");
+
+            writer.Flush();
+        }
+
+        public void Flush(IEnumerable<WindowedBucket> buckets)
+        {
+            var lines = buckets
+                .OrderBy(x => x.window.start)
+                .ThenBy(x => x.name)
+                .ThenBy(x => x.from)
+                .Select(x => $"{x.window.start.ToString("mm:ss.fff")} - {x.window.end.ToString("mm:ss.fff")} {Printable(x.name)} {x.from}-{x.to} {x.count}");
 
             foreach (var line in lines)
                 writer.WriteLine(line);

@@ -13,7 +13,6 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Remove="IMeasurementCollector.cs" />
-    <Compile Remove="Histogram.cs" />
     <Compile Remove="EventCollector.cs" />
   </ItemGroup>
 </Project>

@@ -73,5 +73,10 @@ namespace Wibblr.Metrics.SqlServer
                 }
             }
         }
+
+        public void Flush(IEnumerable<WindowedBucket> buckets)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

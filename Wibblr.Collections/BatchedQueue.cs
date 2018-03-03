@@ -22,6 +22,7 @@ namespace Wibblr.Collections
             this.maxCapacity = maxCapacity;
 
             batchList = new LinkedList<List<T>>();
+            batchList.AddLast(new List<T>());
         }
 
         // Add item to back of queue. If already full, this item is

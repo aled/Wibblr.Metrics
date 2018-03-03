@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Wibblr.Metrics.Core
 {
@@ -36,5 +37,14 @@ namespace Wibblr.Metrics.Core
             foreach (var item in items)
                 yield return (item, i++);
         }
+
+        public static bool IsAlphanumeric(this string s) => 
+            s.All(c => char.IsLetterOrDigit(c));
+
+        public static bool IsEmpty<T>(this IEnumerable<T> items) =>
+            !items.Any();
+
+        public static string Join(this IEnumerable<string> items, string separator = ", ") =>
+            string.Join(separator, items);
     }
 }
