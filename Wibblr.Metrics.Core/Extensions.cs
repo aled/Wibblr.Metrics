@@ -30,29 +30,11 @@ namespace Wibblr.Metrics.Core
                 yield return batch;
         }
 
-        public static IEnumerable<IEnumerable<T>> Batches<T>(this IEnumerable<T> items, int initialBatchSize, int batchSize)
-        {
-            var batch = new List<T>();
-            var count = initialBatchSize;
-            foreach (var item in items)
-            {
-                batch.Add(item);
-                if (batch.Count == count)
-                {
-                    yield return batch;
-                    count = batchSize;
-                }
-            }
-            if (batch.Count > 0)
-                yield return batch;
-        }
-
         public static IEnumerable<(T, int)> ZipWithIndex<T>(this IEnumerable<T> items)
         {
             var i = 0;
             foreach (var item in items)
                 yield return (item, i++);
         }
-
     }
 }

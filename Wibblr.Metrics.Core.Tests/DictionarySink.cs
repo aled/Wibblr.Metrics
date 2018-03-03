@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Wibblr.Metrics.Core
+namespace Wibblr.Metrics.Core.Tests
 {
     public class DictionarySink : IMetricsSink
     {

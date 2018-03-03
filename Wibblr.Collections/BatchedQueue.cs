@@ -67,7 +67,6 @@ namespace Wibblr.Collections
                 {
                     count -= batchList.Last.Value.Count();
                     batchList.RemoveLast();
-
                 }
                 else
                 {
