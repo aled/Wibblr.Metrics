@@ -9,7 +9,7 @@ namespace Wibblr.Metrics.Examples
         static void Main(string[] args)
         {
             var connectionString = "Data Source=(local)\\SQLEXPRESS;Initial Catalog=Test;Integrated Security=SSPI";
-            var tableName = "MetricsEvent";
+            var tableName = "MetricsCounter";
 
             var sink = new SqlServerSink(connectionString, tableName);
             using (var counterCollector = new MetricsCollector(sink, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(2000)))

@@ -25,7 +25,7 @@ namespace Wibblr.Metrics.SqlServer
             this.tableName = tableName;
 
             dataTable = new DataTable();
-            dataTable.Columns.Add("EventName", typeof(string));
+            dataTable.Columns.Add("CounterName", typeof(string));
             dataTable.Columns.Add("StartTime", typeof(DateTime));
             dataTable.Columns.Add("EndTime", typeof(DateTime));
             dataTable.Columns.Add("Count", typeof(long));
@@ -59,7 +59,7 @@ namespace Wibblr.Metrics.SqlServer
                         bc.BatchSize = BatchSize;
                         bc.BulkCopyTimeout = TIMEOUT_SECONDS;
                         bc.EnableStreaming = false;
-                        bc.ColumnMappings.Add("EventName", "EventName");
+                        bc.ColumnMappings.Add("CounterName", "CounterName");
                         bc.ColumnMappings.Add("StartTime", "StartTime");
                         bc.ColumnMappings.Add("EndTime", "EndTime");
                         bc.ColumnMappings.Add("Count", "Count");
