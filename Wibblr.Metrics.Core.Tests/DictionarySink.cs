@@ -7,7 +7,7 @@ namespace Wibblr.Metrics.Core.Tests
     {
         public Dictionary<Metric, long> Counters { get; } = new Dictionary<Metric, long>();
 
-        public void Flush(IEnumerable<AggregatedCounter> counters)
+        public void Flush(IEnumerable<WindowedCounter> counters)
         {
             foreach (var c in counters)
             {

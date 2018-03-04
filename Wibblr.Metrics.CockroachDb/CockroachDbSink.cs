@@ -13,7 +13,7 @@ namespace Wibblr.Metrics.CockroachDb
     {
         private ICockroachDbConfig config;
 
-        private BatchedQueue<AggregatedCounter> counterQueue;
+        private BatchedQueue<WindowedCounter> counterQueue;
         private object counterLock = new object();
 
         private BatchedQueue<WindowedBucket> histogramQueue;
@@ -24,7 +24,7 @@ namespace Wibblr.Metrics.CockroachDb
             if (!config.IsValid(out var validationErrors))
                 throw new ArgumentException($"Invalid config: { validationErrors.Join() }", nameof(config));
 
-            counterQueue = new BatchedQueue<AggregatedCounter>(config.BatchSize, config.MaxQueuedRows);
+            counterQueue = new BatchedQueue<WindowedCounter>(config.BatchSize, config.MaxQueuedRows);
             histogramQueue = new BatchedQueue<WindowedBucket>(config.BatchSize, config.MaxQueuedRows);
 
             this.config = config;
@@ -69,7 +69,7 @@ namespace Wibblr.Metrics.CockroachDb
             }
         }
 
-        internal string BuildCounterSql(IEnumerable<AggregatedCounter> batch, NpgsqlCommand cmd)
+        internal string BuildCounterSql(IEnumerable<WindowedCounter> batch, NpgsqlCommand cmd)
         {
             var sql = new StringBuilder(1024);
 
@@ -104,7 +104,7 @@ namespace Wibblr.Metrics.CockroachDb
             return sql.ToString();
         }
 
-        public void Flush(IEnumerable<AggregatedCounter> counters)
+        public void Flush(IEnumerable<WindowedCounter> counters)
         {
             // Any counters that would make the queue go longer than MaxQueuedRows
             // will be discarded.
@@ -125,7 +125,7 @@ namespace Wibblr.Metrics.CockroachDb
                         cmd.CommandType = CommandType.Text;
                         cmd.CommandTimeout = 900;
 
-                        List<AggregatedCounter> batch = null;
+                        List<WindowedCounter> batch = null;
                         lock (counterLock)
                         {
                             if (counterQueue.Count() > 0)

@@ -31,7 +31,7 @@ namespace Wibblr.Metrics.SqlServer
             dataTable.Columns.Add("Count", typeof(long));
         }
 
-        public void Flush(IEnumerable<AggregatedCounter> counters)
+        public void Flush(IEnumerable<WindowedCounter> counters)
         {
             lock (dataTableLock)
             {

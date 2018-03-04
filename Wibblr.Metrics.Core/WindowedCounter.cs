@@ -2,7 +2,7 @@
 
 namespace Wibblr.Metrics.Core
 {
-    public struct AggregatedCounter
+    public struct WindowedCounter
     {
         public string name;
         public Window window;

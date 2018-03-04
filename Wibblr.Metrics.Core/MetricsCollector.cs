@@ -20,6 +20,7 @@ namespace Wibblr.Metrics.Core
 
         private readonly Dictionary<Metric, Histogram> histograms = new Dictionary<Metric, Histogram>();
         private readonly object histogramsLock = new object();
+        private Dictionary<string, int[]> thresholdDict = new Dictionary<string, int[]>();
 
         private TimeSpan windowSize;
         private TimeSpan flushInterval;
@@ -69,6 +70,7 @@ namespace Wibblr.Metrics.Core
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Wibblr.Metrics.Core.CounterCollector"/> class.
+        /// with default values (window size and flush interval are 1 minute)
         /// </summary>
         /// <param name="sink">The sink to write the events to.</param>
         public MetricsCollector(IMetricsSink sink)
@@ -92,8 +94,6 @@ namespace Wibblr.Metrics.Core
             }
         }
 
-        private Dictionary<string, int[]> thresholdDict = new Dictionary<string, int[]>();
-
         public void RegisterThresholds(string histogramName, int[] thresholds)
         {
             thresholdDict[histogramName] = thresholds;
@@ -103,8 +103,9 @@ namespace Wibblr.Metrics.Core
         {
             var key = new Metric(name, new Window(clock.Current, windowSize));
 
+            // Default thresholds - useful for measuring web page latencies in milliseconds
             if (!thresholdDict.TryGetValue(name, out var thresholds))
-                thresholds = new int[] { 0, 10, 100, 1000, 10000, 100000, 1000000 };
+                thresholds = new int[] { 0, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 30000, 60000, 120000, 300000, 600000, 1800000 };
 
             lock (histogramsLock)
             {
@@ -121,7 +122,7 @@ namespace Wibblr.Metrics.Core
         private void Flush()
         {
             bool isFlushCancelled = clock.IsDelayedActionCancelled();
-            var tempCounters = new List<AggregatedCounter>();
+            var tempCounters = new List<WindowedCounter>();
             var tempBuckets = new List<WindowedBucket>();
 
             // Any events that are recorded after this line will have a start time equal
@@ -137,7 +138,7 @@ namespace Wibblr.Metrics.Core
                     // so that each counter is only written once for each window.
                     if (isFlushCancelled || c.window.start < currentTimePeriodStart)
                     {
-                        tempCounters.Add(new AggregatedCounter 
+                        tempCounters.Add(new WindowedCounter 
                         { 
                             name = c.name,
                             window = c.window,

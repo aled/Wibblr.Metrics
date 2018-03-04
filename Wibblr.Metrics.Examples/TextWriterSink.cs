@@ -17,7 +17,7 @@ namespace Wibblr.Metrics.Core
         private string Printable(string s) =>
             new String(s.SelectMany(c => Char.IsControl(c) ? ("0x" + ((int)c).ToString("X4")).ToCharArray() : new char[] { c }).ToArray());
 
-        public void Flush(IEnumerable<AggregatedCounter> events)
+        public void Flush(IEnumerable<WindowedCounter> events)
         {
             var lines = events
                 .OrderBy(x => x.window.start)
