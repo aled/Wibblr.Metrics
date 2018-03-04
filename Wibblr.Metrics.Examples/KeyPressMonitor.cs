@@ -1,24 +1,36 @@
 ﻿using System;
+using System.Diagnostics;
 using Wibblr.Metrics.Core;
 
 namespace Wibblr.Metrics.Examples
 {
-    class KeyPressMonitor
+    public class KeyPressMonitor
     {
-        static void Main(string[] args)
+        public void Run(IMetricsSink sink)
         {
-            var sink = new TextWriterSink(Console.Out);
-            var counterCollector = new MetricsCollector(sink, TimeSpan.FromMilliseconds(1000), TimeSpan.FromSeconds(1));
-
-            Console.WriteLine("Press some keys; enter to stop recording events");
-            char key;
-            do
+            using (var metrics = new MetricsCollector(sink,
+                                                      windowSize: TimeSpan.FromSeconds(10),
+                                                      flushInterval: TimeSpan.FromSeconds(10),
+                                                      ignoreEmptyBuckets: true))
             {
-                key = Console.ReadKey(true).KeyChar;
-                counterCollector.IncrementCounter(key.ToString());
-            } while (key != '\r' && key != '\n');  // \r = windows; \n = mac
+                metrics.RegisterThresholds("latency", new int[] { 0, 50, 75, 100, 1000, 2000, 10000 });
+                Console.WriteLine("Press some keys; enter to exit");
+                char key;
+                var stopwatch = new Stopwatch();
 
-            counterCollector.Dispose();
+                do
+                {
+                    stopwatch.Start();
+                    key = Console.ReadKey(true).KeyChar;
+                    stopwatch.Stop();
+
+                    metrics.IncrementCounter(key.ToString());
+                    metrics.IncrementBucket("latency", stopwatch.ElapsedMilliseconds);
+
+                    stopwatch.Reset();
+
+                } while (key != '\r' && key != '\n');
+            }
 
             Console.WriteLine("Press any key to exit");
             Console.ReadKey();

@@ -22,28 +22,9 @@ namespace Wibblr.Metrics.Examples
                 MaxQueuedRows = 10000
             }.Build();
 
-            sink.CreateTableIfNotExists();
+            sink.EnsureTablesExist();
 
-            using (var metrics = new MetricsCollector(sink, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(5)))
-            {
-                metrics.RegisterThresholds("latency", new int[] {0, 50, 75, 100, 1000, 2000, 10000});
-                Console.WriteLine("Press some keys; enter to exit");
-                char key;
-                var stopwatch = new Stopwatch();
-                    
-                do
-                {
-                    stopwatch.Start();
-                    key = Console.ReadKey(true).KeyChar;
-                    stopwatch.Stop();
-
-                    metrics.IncrementCounter(key.ToString());
-                    metrics.IncrementBucket("latency", stopwatch.ElapsedMilliseconds);
-
-                    stopwatch.Reset();
-
-                } while (key.ToString() != Environment.NewLine);
-            }
+            new KeyPressMonitor().Run(sink);
         }
     }
 }

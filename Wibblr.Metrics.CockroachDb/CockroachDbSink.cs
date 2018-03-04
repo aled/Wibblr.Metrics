@@ -30,7 +30,7 @@ namespace Wibblr.Metrics.CockroachDb
             this.config = config;
         }
 
-        public void CreateTableIfNotExists()
+        public void EnsureTablesExist()
         {
             using (var con = new NpgsqlConnection(config.ConnectionString))
             {

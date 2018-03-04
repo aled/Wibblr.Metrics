@@ -23,6 +23,7 @@ namespace Wibblr.Metrics.Core
 
         private TimeSpan windowSize;
         private TimeSpan flushInterval;
+        private bool ignoreEmptyBuckets;
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Wibblr.Metrics.Core.EventCollector"/> class.
@@ -33,7 +34,7 @@ namespace Wibblr.Metrics.Core
         /// <param name="clock">Clock.</param>
         /// <param name="windowSize">Resolution.</param>
         /// <param name="flushInterval">Flush interval.</param>
-        internal MetricsCollector(IMetricsSink sink, IClock clock, TimeSpan windowSize, TimeSpan flushInterval)
+        internal MetricsCollector(IMetricsSink sink, IClock clock, TimeSpan windowSize, TimeSpan flushInterval, bool ignoreEmptyBuckets)
         {
             if (windowSize.TotalMilliseconds < 100)
                 throw new ArgumentException("Must be 100ms or greater", nameof(windowSize));
@@ -51,6 +52,7 @@ namespace Wibblr.Metrics.Core
             this.clock = clock;
             this.windowSize = windowSize;
             this.flushInterval = flushInterval;
+            this.ignoreEmptyBuckets = true;
 
             clock.SetDelayedAction(Flush);
             clock.ExecuteAfterDelay(flushInterval);
@@ -62,21 +64,21 @@ namespace Wibblr.Metrics.Core
         /// <param name="sink">The sink to write the events to.</param>
         /// <param name="windowSize">Resolution.</param>
         /// <param name="flushInterval">Batch will be flushed when this amount of time has passed</param>
-        public MetricsCollector(IMetricsSink sink, TimeSpan windowSize, TimeSpan flushInterval)
-            : this(sink, new Clock(), windowSize, flushInterval) { }
+        public MetricsCollector(IMetricsSink sink, TimeSpan windowSize, TimeSpan flushInterval, bool ignoreEmptyBuckets = false)
+            : this(sink, new Clock(), windowSize, flushInterval, ignoreEmptyBuckets) { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Wibblr.Metrics.Core.CounterCollector"/> class.
         /// </summary>
         /// <param name="sink">The sink to write the events to.</param>
         public MetricsCollector(IMetricsSink sink)
-            : this(sink, new Clock(), TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(3)) { }
+            : this(sink, new Clock(), TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(60), false) { }
 
         /// <summary>
         /// Increments a counter.
         /// </summary>
         /// <param name="name">Name.</param>
-        /// <param name="name">Increment.</param>
+        /// <param name="increment">Increment.</param>
         public void IncrementCounter(string name, long increment = 1)
         {
             var key = new Metric(name, new Window(clock.Current, windowSize));
@@ -153,6 +155,9 @@ namespace Wibblr.Metrics.Core
                     {
                         foreach (var bucket in histograms[h].Buckets())
                         {
+                            if (ignoreEmptyBuckets && bucket.count == 0)
+                                continue;
+                            
                             tempBuckets.Add(new WindowedBucket
                             {
                                 name = h.name,
