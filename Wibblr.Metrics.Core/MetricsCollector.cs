@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Threading;
 
 namespace Wibblr.Metrics.Core
 {
@@ -21,6 +23,12 @@ namespace Wibblr.Metrics.Core
         private readonly Dictionary<Metric, Histogram> histograms = new Dictionary<Metric, Histogram>();
         private readonly object histogramsLock = new object();
         private Dictionary<string, int[]> thresholdDict = new Dictionary<string, int[]>();
+
+        private readonly Dictionary<string, List<DateTime>> events = new Dictionary<string, List<DateTime>>();
+        private readonly object eventsLock = new object();
+
+        private readonly Dictionary<string, ProfilingSession> profiles = new Dictionary<string, ProfilingSession>();
+        private readonly object profileLock = new object();
 
         private TimeSpan windowSize;
         private TimeSpan flushInterval;
@@ -116,6 +124,36 @@ namespace Wibblr.Metrics.Core
             }
         }
 
+        public void Event(string name)
+        {
+            var timestamp = DateTime.UtcNow;
+
+            lock (eventsLock)
+            {
+                if (!events.TryGetValue(name, out List<DateTime> existing))
+                    events[name] = new List<DateTime>();
+
+                events[name].Add(timestamp);
+            }
+        }
+
+        /// <summary>
+        /// Used to profile a block of code (by putting it in a Using statement)
+        /// At the end of the Using block
+        /// </summary>
+        public IDisposable GetProfiler(string sessionId, string name)
+        {
+            return new ProfilingIntervalBuilder(this, sessionId, name); 
+        }
+
+        public void ProfileInterval(ProfilingInterval profilingInterval)
+        {
+            lock (profileLock)
+            {
+                
+            }
+        }
+
         /// <summary>
         /// Flush this instance.
         /// </summary>
@@ -124,6 +162,7 @@ namespace Wibblr.Metrics.Core
             bool isFlushCancelled = clock.IsDelayedActionCancelled();
             var tempCounters = new List<WindowedCounter>();
             var tempBuckets = new List<WindowedBucket>();
+            var tempEvents = new List<TimestampedEvent>();
 
             // Any events that are recorded after this line will have a start time equal
             // or later to this.
@@ -148,6 +187,7 @@ namespace Wibblr.Metrics.Core
                     }    
                 }
             }
+
             lock (histogramsLock)
             {
                 foreach (var h in histograms.Keys.ToList())
@@ -173,6 +213,22 @@ namespace Wibblr.Metrics.Core
                 }
             }
 
+            lock (eventsLock)
+            {
+                foreach (var name in events.Keys.ToList())
+                {
+                    foreach (var timestamp in events[name]) 
+                    {
+                        tempEvents.Add(new TimestampedEvent()
+                        {
+                            name = name,
+                            timestamp = timestamp
+                        });
+                    }
+                }
+                events.Clear();
+            }
+
             // Flush even if there are no events, so that any queued events
             // in the sink are flushed.
             if (tempCounters != null)
@@ -180,6 +236,9 @@ namespace Wibblr.Metrics.Core
 
             if (tempBuckets != null)
                 sink.Flush(tempBuckets);
+
+            if (tempEvents != null)
+                sink.Flush(tempEvents);
 
             if (!isFlushCancelled)
                 clock.ExecuteAfterDelay(flushInterval);    

@@ -19,6 +19,8 @@ namespace Wibblr.Metrics.CockroachDb
         private BatchedQueue<WindowedBucket> histogramQueue;
         private object histogramLock = new object();
 
+        private Table EventTable;
+
         public CockroachDbSink(ICockroachDbConfig config)
         {
             if (!config.IsValid(out var validationErrors))
@@ -26,6 +28,17 @@ namespace Wibblr.Metrics.CockroachDb
 
             counterQueue = new BatchedQueue<WindowedCounter>(config.BatchSize, config.MaxQueuedRows);
             histogramQueue = new BatchedQueue<WindowedBucket>(config.BatchSize, config.MaxQueuedRows);
+
+            EventTable = new Table(config.BatchSize, config.MaxQueuedRows)
+            {
+                Name = "MetricsEvent",
+                Columns = new Column[] {
+                    new Column{ Name = "Id", DataType = "UUID", DefaultFunction = "gen_random_uuid()" },
+                    new Column{ Name = "EventName", DataType = "VARCHAR(1000)" },
+                    new Column{ Name = "Timestamp", DataType = "TIMESTAMP" }
+                },
+                PrimaryKey = "Id",       
+            };
 
             this.config = config;
         }
@@ -64,6 +77,9 @@ namespace Wibblr.Metrics.CockroachDb
                         "BucketTo INT4, " +
                         "Count INT);";
 
+                    cmd.ExecuteNonQuery();
+
+                    cmd.CommandText = EventTable.CreateTableSql(config.Database);
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -250,5 +266,11 @@ namespace Wibblr.Metrics.CockroachDb
                 Console.WriteLine(e.Message);
             }
         }
+
+        public void Flush(IEnumerable<TimestampedEvent> events)
+        {
+            EventTable.Insert(config.Database, config.ConnectionString, events.Select(e => new object[] { e.name, e.timestamp }));
+        }
     }
 }
+

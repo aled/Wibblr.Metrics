@@ -16,7 +16,7 @@ namespace Wibblr.Metrics.Core.Tests
 
             var sink = new DictionarySink();
 
-            using (var e = new MetricsCollector(sink, clock, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5)))
+            using (var e = new MetricsCollector(sink, clock, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), false))
             {
                 clock.Set("12:00:04.000");
                 e.IncrementCounter("myevent");
@@ -39,7 +39,7 @@ namespace Wibblr.Metrics.Core.Tests
             clock.Set("11:00:00.000");
             var sink = new DictionarySink();
 
-            using (var e = new MetricsCollector(sink, clock, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5)))
+            using (var e = new MetricsCollector(sink, clock, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), false))
             {
                 clock.Set("12:00:01.500");
 

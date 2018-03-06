@@ -26,6 +26,7 @@ namespace Wibblr.Metrics.Examples
 
                     metrics.IncrementCounter(key.ToString());
                     metrics.IncrementBucket("latency", stopwatch.ElapsedMilliseconds);
+                    metrics.Event(key.ToString());
 
                     stopwatch.Reset();
 

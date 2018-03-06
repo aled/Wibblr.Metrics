@@ -7,5 +7,6 @@ namespace Wibblr.Metrics.Core
     {
         void Flush(IEnumerable<WindowedCounter> counters);
         void Flush(IEnumerable<WindowedBucket> buckets);
+        void Flush(IEnumerable<TimestampedEvent> events);
     }
 }

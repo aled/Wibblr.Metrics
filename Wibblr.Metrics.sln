@@ -16,6 +16,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Collections", "Wibbl
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Collections.Tests", "Wibblr.Collections.Tests\Wibblr.Collections.Tests.csproj", "{4EFFF141-D4D8-4C27-917C-0B0D26EFA6CE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Metrics.Benchmarks", "Wibblr.Metrics.Benchmarks\Wibblr.Metrics.Benchmarks.csproj", "{C724CC1D-A9EE-4D12-B0DD-F1FA38E3FC38}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -50,6 +52,10 @@ Global
 		{4EFFF141-D4D8-4C27-917C-0B0D26EFA6CE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4EFFF141-D4D8-4C27-917C-0B0D26EFA6CE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4EFFF141-D4D8-4C27-917C-0B0D26EFA6CE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C724CC1D-A9EE-4D12-B0DD-F1FA38E3FC38}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C724CC1D-A9EE-4D12-B0DD-F1FA38E3FC38}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C724CC1D-A9EE-4D12-B0DD-F1FA38E3FC38}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C724CC1D-A9EE-4D12-B0DD-F1FA38E3FC38}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

@@ -78,5 +78,10 @@ namespace Wibblr.Metrics.SqlServer
         {
             throw new NotImplementedException();
         }
+
+        public void Flush(IEnumerable<TimestampedEvent> events)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

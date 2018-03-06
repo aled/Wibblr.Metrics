@@ -24,12 +24,15 @@ namespace Wibblr.Metrics.Core
                 .ThenBy(x => x.name)
                 .Select(x => $"{x.window.start.ToString("mm:ss.fff")} - {x.window.end.ToString("mm:ss.fff")} {Printable(x.name)} {x.count}");
 
-            foreach (var line in lines)
-                writer.WriteLine(line);
+            if (lines.Any())
+            {
+                foreach (var line in lines)
+                    writer.WriteLine(line);
 
-            writer.WriteLine("---");
+                writer.WriteLine("---");
 
-            writer.Flush();
+                writer.Flush();
+            }
         }
 
         public void Flush(IEnumerable<WindowedBucket> buckets)
@@ -40,12 +43,33 @@ namespace Wibblr.Metrics.Core
                 .ThenBy(x => x.from)
                 .Select(x => $"{x.window.start.ToString("mm:ss.fff")} - {x.window.end.ToString("mm:ss.fff")} {Printable(x.name)} {x.from}-{x.to} {x.count}");
 
-            foreach (var line in lines)
-                writer.WriteLine(line);
+            if (lines.Any())
+            {
+                foreach (var line in lines)
+                    writer.WriteLine(line);
 
-            writer.WriteLine("---");
+                writer.WriteLine("---");
 
-            writer.Flush();
+                writer.Flush();
+            }
+        }
+
+        public void Flush(IEnumerable<TimestampedEvent> events)
+        {
+            var lines = events
+                .OrderBy(x => x.timestamp)
+                .ThenBy(x => x.name)
+                .Select(x => $"{x.timestamp.ToString("mm:ss.fff")} {Printable(x.name)}");
+
+            if (lines.Any())
+            {
+                foreach (var line in lines)
+                    writer.WriteLine(line);
+
+                writer.WriteLine("---");
+
+                writer.Flush();
+            }
         }
     }
 }

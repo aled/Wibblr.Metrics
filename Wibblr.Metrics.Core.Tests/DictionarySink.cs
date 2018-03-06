@@ -23,5 +23,10 @@ namespace Wibblr.Metrics.Core.Tests
         {
             throw new NotImplementedException();
         }
+
+        public void Flush(IEnumerable<TimestampedEvent> events)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
