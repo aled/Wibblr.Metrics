@@ -2,9 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
-using System.Text;
 using Npgsql;
-using Wibblr.Collections;
 using Wibblr.Metrics.Core;
 
 namespace Wibblr.Metrics.CockroachDb
@@ -13,23 +11,44 @@ namespace Wibblr.Metrics.CockroachDb
     {
         private ICockroachDbConfig config;
 
-        private BatchedQueue<WindowedCounter> counterQueue;
-        private object counterLock = new object();
-
-        private BatchedQueue<WindowedBucket> histogramQueue;
-        private object histogramLock = new object();
-
-        private Table EventTable;
+        private Table counterTable;
+        private Table histogramTable;
+        private Table eventTable;
 
         public CockroachDbSink(ICockroachDbConfig config)
         {
             if (!config.IsValid(out var validationErrors))
                 throw new ArgumentException($"Invalid config: { validationErrors.Join() }", nameof(config));
 
-            counterQueue = new BatchedQueue<WindowedCounter>(config.BatchSize, config.MaxQueuedRows);
-            histogramQueue = new BatchedQueue<WindowedBucket>(config.BatchSize, config.MaxQueuedRows);
+            counterTable = new Table(config.BatchSize, config.MaxQueuedRows)
+            {
+                Name = "MetricsCounter",
+                Columns = new Column[] {
+                    new Column{ Name = "Id", DataType = "UUID", DefaultFunction = "gen_random_uuid()" },
+                    new Column{ Name = "CounterName", DataType = "VARCHAR(1000)" },
+                    new Column{ Name = "StartTime", DataType = "TIMESTAMP" },
+                    new Column{ Name = "EndTime", DataType = "TIMESTAMP" },
+                    new Column{ Name = "Count", DataType = "INT" },
+                },
+                PrimaryKey = "Id",
+            };
 
-            EventTable = new Table(config.BatchSize, config.MaxQueuedRows)
+            histogramTable = new Table(config.BatchSize, config.MaxQueuedRows)
+            {
+                Name = "MetricsHistogram",
+                Columns = new Column[] {
+                    new Column{ Name = "Id", DataType = "UUID", DefaultFunction = "gen_random_uuid()" },
+                    new Column{ Name = "CounterName", DataType = "VARCHAR(1000)" },
+                    new Column{ Name = "StartTime", DataType = "TIMESTAMP" },
+                    new Column{ Name = "EndTime", DataType = "TIMESTAMP" },
+                    new Column{ Name = "BucketFrom", DataType = "INT4" },
+                    new Column{ Name = "BucketTo", DataType = "INT4" },
+                    new Column{ Name = "Count", DataType = "INT" },
+                },
+                PrimaryKey = "Id",
+            };
+
+            eventTable = new Table(config.BatchSize, config.MaxQueuedRows)
             {
                 Name = "MetricsEvent",
                 Columns = new Column[] {
@@ -52,224 +71,56 @@ namespace Wibblr.Metrics.CockroachDb
                 {
                     cmd.Connection = con;
                     cmd.CommandType = CommandType.Text;
-                    cmd.CommandText =
-                        $"CREATE DATABASE IF NOT EXISTS {config.Database};";
+                    cmd.CommandText = $"CREATE DATABASE IF NOT EXISTS {config.Database};";
 
                     cmd.ExecuteNonQuery();
 
-                    cmd.CommandText =
-                        $"CREATE TABLE IF NOT EXISTS {config.Database}.{config.CounterTable} (" +
-                        "Id UUID PRIMARY KEY DEFAULT gen_random_uuid(), " +
-                        "CounterName VARCHAR(1000), " +
-                        "StartTime TIMESTAMP WITHOUT TIME ZONE, " +
-                        "EndTime TIMESTAMP WITHOUT TIME ZONE, " +
-                        "Count INT);";
-
+                    cmd.CommandText = counterTable.CreateTableSql(config.Database);
                     cmd.ExecuteNonQuery();
 
-                    cmd.CommandText =
-                        $"CREATE TABLE IF NOT EXISTS {config.Database}.{config.HistogramTable} (" +
-                        "Id UUID PRIMARY KEY DEFAULT gen_random_uuid(), " +
-                        "HistogramName VARCHAR(1000), " +
-                        "StartTime TIMESTAMP WITHOUT TIME ZONE, " +
-                        "EndTime TIMESTAMP WITHOUT TIME ZONE, " +
-                        "BucketFrom INT4, " +
-                        "BucketTo INT4, " +
-                        "Count INT);";
-
+                    cmd.CommandText = histogramTable.CreateTableSql(config.Database);
                     cmd.ExecuteNonQuery();
 
-                    cmd.CommandText = EventTable.CreateTableSql(config.Database);
+                    cmd.CommandText = eventTable.CreateTableSql(config.Database);
                     cmd.ExecuteNonQuery();
                 }
             }
-        }
-
-        internal string BuildCounterSql(IEnumerable<WindowedCounter> batch, NpgsqlCommand cmd)
-        {
-            var sql = new StringBuilder(1024);
-
-            foreach (var (item, i) in batch.ZipWithIndex())
-            {
-                if (i == 0)
-                    sql.Append("INSERT INTO ")
-                       .Append(config.Database)
-                       .Append(".")
-                       .Append(config.CounterTable)
-                       .Append("(CounterName, StartTime, EndTime, Count) VALUES\n");
-                else
-                    sql.Append(",\n");
-
-                var parameterEventName = $"@counterName_{i:000}";
-                var parameterStartTime = $"@startTime_{i:000}";
-                var parameterEndTime = $"@endTime_{i:000}";
-                var parameterCount = $"@count_{i:000}";
-
-                sql.Append("(")
-                   .Append(parameterEventName).Append(", ")
-                   .Append(parameterStartTime).Append(", ")
-                   .Append(parameterEndTime).Append(", ")
-                   .Append(parameterCount).Append(")");
-
-                cmd.Parameters.AddWithValue(parameterEventName, item.name);
-                cmd.Parameters.AddWithValue(parameterStartTime, item.window.start);
-                cmd.Parameters.AddWithValue(parameterEndTime, item.window.end);
-                cmd.Parameters.AddWithValue(parameterCount, item.count);
-            }
-            sql.Append(";");
-            return sql.ToString();
         }
 
         public void Flush(IEnumerable<WindowedCounter> counters)
         {
-            // Any counters that would make the queue go longer than MaxQueuedRows
-            // will be discarded.
-            lock (counterLock)
-            {
-                counterQueue.Enqueue(counters);
-            }
-
-            // I hope there is a better way to do bulk inserts in cockroach db...
-            try
-            {
-                using (var con = new NpgsqlConnection(config.ConnectionString))
-                {
-                    con.Open();
-                    using (var cmd = new NpgsqlCommand())
-                    {
-                        cmd.Connection = con;
-                        cmd.CommandType = CommandType.Text;
-                        cmd.CommandTimeout = 900;
-
-                        List<WindowedCounter> batch = null;
-                        lock (counterLock)
-                        {
-                            if (counterQueue.Count() > 0)
-                                batch = counterQueue.DequeueBatch();
-                        }
-
-                        if (batch != null)
-                        {
-                            cmd.CommandText = BuildCounterSql(batch, cmd);
-                            try
-                            {
-                                cmd.ExecuteNonQuery();
-                            }
-                            catch (Exception e)
-                            {
-                                Console.WriteLine(e.Message);
-                                lock (counterLock)
-                                {
-                                    counterQueue.EnqueueToFront(batch);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-        }
-
-        internal string BuildHistogramSql(IEnumerable<WindowedBucket> batch, NpgsqlCommand cmd)
-        {
-            var sql = new StringBuilder(1024);
-
-            foreach (var (item, i) in batch.ZipWithIndex())
-            {
-                if (i == 0)
-                    sql.Append("INSERT INTO ")
-                       .Append(config.Database)
-                       .Append(".")
-                       .Append(config.HistogramTable)
-                       .Append("(HistogramName, StartTime, EndTime, BucketFrom, BucketTo, Count) VALUES\n");
-                else
-                    sql.Append(",\n");
-
-                var parameterHistogramName = $"@histogramName_{i:000}";
-                var parameterStartTime = $"@startTime_{i:000}";
-                var parameterEndTime = $"@endTime_{i:000}";
-                var parameterBucketFrom = $"@bucketFrom_{i:000}";
-                var parameterBucketTo = $"@bucketTo_{i:000}";
-                var parameterCount = $"@count_{i:000}";
-
-                sql.Append("(")
-                   .Append(parameterHistogramName).Append(", ")
-                   .Append(parameterStartTime).Append(", ")
-                   .Append(parameterEndTime).Append(", ")
-                   .Append(parameterBucketFrom).Append(", ")
-                   .Append(parameterBucketTo).Append(", ")
-                   .Append(parameterCount).Append(")");
-
-                cmd.Parameters.AddWithValue(parameterHistogramName, item.name);
-                cmd.Parameters.AddWithValue(parameterStartTime, item.window.start);
-                cmd.Parameters.AddWithValue(parameterEndTime, item.window.end);
-                cmd.Parameters.AddWithValue(parameterBucketFrom, item.from ?? int.MinValue);
-                cmd.Parameters.AddWithValue(parameterBucketTo, item.to ?? int.MaxValue);
-                cmd.Parameters.AddWithValue(parameterCount, item.count);
-            }
-            sql.Append(";");
-            return sql.ToString();
+            counterTable.Insert(
+                config.Database,
+                config.ConnectionString,
+                counters.Select(b => new object[] {
+                    b.name,
+                    b.window.start,
+                    b.window.end,
+                    b.count }));
         }
 
         public void Flush(IEnumerable<WindowedBucket> buckets)
         {
-            // Any counters that would make the queue go longer than MaxQueuedRows
-            // will be discarded.
-            lock (histogramLock)
-            {
-                histogramQueue.Enqueue(buckets);
-            }
-
-            // I hope there is a better way to do bulk inserts in cockroach db...
-            try
-            {
-                using (var con = new NpgsqlConnection(config.ConnectionString))
-                {
-                    con.Open();
-                    using (var cmd = new NpgsqlCommand())
-                    {
-                        cmd.Connection = con;
-                        cmd.CommandType = CommandType.Text;
-                        cmd.CommandTimeout = 900;
-
-                        List<WindowedBucket> batch = null;
-                        lock (histogramLock)
-                        {
-                            if (histogramQueue.Count() > 0)
-                                batch = histogramQueue.DequeueBatch();
-                        }
-
-                        if (batch != null)
-                        {
-                            cmd.CommandText = BuildHistogramSql(batch, cmd);
-                            try
-                            {
-                                cmd.ExecuteNonQuery();
-                            }
-                            catch (Exception e)
-                            {
-                                Console.WriteLine(e.Message);
-                                lock (histogramLock)
-                                {
-                                    histogramQueue.EnqueueToFront(batch);
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
+            histogramTable.Insert(
+                config.Database,
+                config.ConnectionString,
+                buckets.Select(b => new object[] {
+                    b.name,
+                    b.window.start,
+                    b.window.end,
+                    b.from ?? int.MinValue,
+                    b.to ?? int.MaxValue,
+                    b.count }));
         }
 
         public void Flush(IEnumerable<TimestampedEvent> events)
         {
-            EventTable.Insert(config.Database, config.ConnectionString, events.Select(e => new object[] { e.name, e.timestamp }));
+            eventTable.Insert(
+                config.Database, 
+                config.ConnectionString, 
+                events.Select(e => new object[] { 
+                    e.name, 
+                    e.timestamp }));
         }
     }
 }
