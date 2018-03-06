@@ -37,7 +37,13 @@ namespace Wibblr.Metrics.Core
             if (delay > int.MaxValue)
                 delay = int.MaxValue;
 
-            timer.Change((int)delay, Timeout.Infinite);    
+            // need to synchronize this call, in case the timer is disposed
+            // by the time we call the Change() method
+            lock (disposeLock)
+            {
+                if (!IsDelayedActionCancelled())
+                    timer.Change((int)delay, Timeout.Infinite);
+            }
         }
 
         /// <summary>
