@@ -91,14 +91,21 @@ namespace Wibblr.Metrics.Core
         /// <param name="increment">Increment.</param>
         public void IncrementCounter(string name, long increment = 1)
         {
-            var key = new Metric(name, new Window(clock.Current, windowSize));
-
-            lock (countersLock)
+            try
             {
-                if (counters.TryGetValue(key, out long existingCount))
-                    counters[key] = existingCount + increment;
-                else
-                    counters[key] = increment;
+                var key = new Metric(name, new Window(clock.Current, windowSize));
+
+                lock (countersLock)
+                {
+                    if (counters.TryGetValue(key, out long existingCount))
+                        counters[key] = existingCount + increment;
+                    else
+                        counters[key] = increment;
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e.Message);
             }
         }
 
@@ -109,31 +116,45 @@ namespace Wibblr.Metrics.Core
 
         public void IncrementBucket(string name, float value)
         {
-            var key = new Metric(name, new Window(clock.Current, windowSize));
-
-            // Default thresholds - useful for measuring web page latencies in milliseconds
-            if (!thresholdDict.TryGetValue(name, out var thresholds))
-                thresholds = new int[] { 0, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 30000, 60000, 120000, 300000, 600000, 1800000 };
-
-            lock (histogramsLock)
+            try
             {
-                if (!histograms.TryGetValue(key, out Histogram existing))
-                    histograms[key] = new Histogram(thresholds);
+                var key = new Metric(name, new Window(clock.Current, windowSize));
 
-                histograms[key].Add(value);                    
+                // Default thresholds - useful for measuring web page latencies in milliseconds
+                if (!thresholdDict.TryGetValue(name, out var thresholds))
+                    thresholds = new int[] { 0, 1000, 2000, 3000, 4000, 5000, 7500, 10000, 15000, 30000, 60000, 120000, 300000, 600000, 1800000 };
+
+                lock (histogramsLock)
+                {
+                    if (!histograms.TryGetValue(key, out Histogram existing))
+                        histograms[key] = new Histogram(thresholds);
+
+                    histograms[key].Add(value);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e.Message);
             }
         }
 
         public void Event(string name)
         {
-            var timestamp = DateTime.UtcNow;
-
-            lock (eventsLock)
+            try
             {
-                if (!events.TryGetValue(name, out List<DateTime> existing))
-                    events[name] = new List<DateTime>();
+                var timestamp = DateTime.UtcNow;
 
-                events[name].Add(timestamp);
+                lock (eventsLock)
+                {
+                    if (!events.TryGetValue(name, out List<DateTime> existing))
+                        events[name] = new List<DateTime>();
+
+                    events[name].Add(timestamp);
+                }
+            }
+            catch (Exception e)
+            {
+                Console.Error.WriteLine(e.Message);
             }
         }
 
@@ -159,90 +180,104 @@ namespace Wibblr.Metrics.Core
         /// </summary>
         private void Flush()
         {
-            bool isFlushCancelled = clock.IsDelayedActionCancelled();
-            var tempCounters = new List<WindowedCounter>();
-            var tempBuckets = new List<WindowedBucket>();
-            var tempEvents = new List<TimestampedEvent>();
-
-            // Any events that are recorded after this line will have a start time equal
-            // or later to this.
-            var currentTimePeriodStart = clock.Current.RoundDown(windowSize);
-
-            lock (countersLock)
+            try
             {
-                foreach (var c in counters.Keys.ToList())
-                {
-                    // Only take counts before the current timeperiod (unless 
-                    // the delayedAction is cancelled, i.e. there will be no more flushes),
-                    // so that each counter is only written once for each window.
-                    if (isFlushCancelled || c.window.start < currentTimePeriodStart)
-                    {
-                        tempCounters.Add(new WindowedCounter 
-                        { 
-                            name = c.name,
-                            window = c.window,
-                            count = counters[c] 
-                        });
-                        counters.Remove(c);
-                    }    
-                }
-            }
+                bool isFlushCancelled = clock.IsDelayedActionCancelled();
+                var tempCounters = new List<WindowedCounter>();
+                var tempBuckets = new List<WindowedBucket>();
+                var tempEvents = new List<TimestampedEvent>();
 
-            lock (histogramsLock)
-            {
-                foreach (var h in histograms.Keys.ToList())
+                // Any events that are recorded after this line will have a start time equal
+                // or later to this.
+                var currentTimePeriodStart = clock.Current.RoundDown(windowSize);
+
+                lock (countersLock)
                 {
-                    if (isFlushCancelled || h.window.start < currentTimePeriodStart)
+                    foreach (var c in counters.Keys.ToList())
                     {
-                        foreach (var bucket in histograms[h].Buckets())
+                        // Only take counts before the current timeperiod (unless 
+                        // the delayedAction is cancelled, i.e. there will be no more flushes),
+                        // so that each counter is only written once for each window.
+                        if (isFlushCancelled || c.window.start < currentTimePeriodStart)
                         {
-                            if (ignoreEmptyBuckets && bucket.count == 0)
-                                continue;
-                            
-                            tempBuckets.Add(new WindowedBucket
+                            tempCounters.Add(new WindowedCounter
                             {
-                                name = h.name,
-                                window = h.window,
-                                from = bucket.from,
-                                to = bucket.to,
-                                count = bucket.count
+                                name = c.name,
+                                window = c.window,
+                                count = counters[c]
+                            });
+                            counters.Remove(c);
+                        }
+                    }
+                }
+
+                lock (histogramsLock)
+                {
+                    foreach (var h in histograms.Keys.ToList())
+                    {
+                        if (isFlushCancelled || h.window.start < currentTimePeriodStart)
+                        {
+                            foreach (var bucket in histograms[h].Buckets())
+                            {
+                                if (ignoreEmptyBuckets && bucket.count == 0)
+                                    continue;
+
+                                tempBuckets.Add(new WindowedBucket
+                                {
+                                    name = h.name,
+                                    window = h.window,
+                                    from = bucket.from,
+                                    to = bucket.to,
+                                    count = bucket.count
+                                });
+                            }
+                            histograms.Remove(h);
+                        }
+                    }
+                }
+
+                lock (eventsLock)
+                {
+                    foreach (var name in events.Keys.ToList())
+                    {
+                        foreach (var timestamp in events[name])
+                        {
+                            tempEvents.Add(new TimestampedEvent()
+                            {
+                                name = name,
+                                timestamp = timestamp
                             });
                         }
-                        histograms.Remove(h);
                     }
+                    events.Clear();
                 }
-            }
 
-            lock (eventsLock)
+                // Flush even if there are no events, so that any queued events
+                // in the sink are flushed.
+                if (tempCounters != null)
+                    sink.Flush(tempCounters);
+
+                if (tempBuckets != null)
+                    sink.Flush(tempBuckets);
+
+                if (tempEvents != null)
+                    sink.Flush(tempEvents);
+            }
+            catch (Exception e)
             {
-                foreach (var name in events.Keys.ToList())
-                {
-                    foreach (var timestamp in events[name]) 
-                    {
-                        tempEvents.Add(new TimestampedEvent()
-                        {
-                            name = name,
-                            timestamp = timestamp
-                        });
-                    }
-                }
-                events.Clear();
+                Console.Error.Write(e.Message);
             }
 
-            // Flush even if there are no events, so that any queued events
-            // in the sink are flushed.
-            if (tempCounters != null)
-                sink.Flush(tempCounters);
-
-            if (tempBuckets != null)
-                sink.Flush(tempBuckets);
-
-            if (tempEvents != null)
-                sink.Flush(tempEvents);
-
-            if (!isFlushCancelled)
-                clock.ExecuteAfterDelay(flushInterval);    
-        }
+            try
+            {
+                if (!clock.IsDelayedActionCancelled())
+                    clock.ExecuteAfterDelay(flushInterval); 
+            }
+            catch (Exception e)
+            {
+                Console.Error.Write(e.Message);
+            }
+         }
 
         /// <summary>
         /// Releases all resource used by the <see cref="T:Wibblr.Metrics.Core.EventCollector"/> object.
