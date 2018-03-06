@@ -1,7 +1,4 @@
-﻿using System;
-using System.Diagnostics;
-using Wibblr.Metrics.CockroachDb;
-using Wibblr.Metrics.Core;
+﻿using Wibblr.Metrics.CockroachDb;
 
 namespace Wibblr.Metrics.Examples
 {

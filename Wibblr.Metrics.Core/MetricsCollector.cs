@@ -1,8 +1,6 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.Threading;
+using System.Linq;
 
 namespace Wibblr.Metrics.Core
 {

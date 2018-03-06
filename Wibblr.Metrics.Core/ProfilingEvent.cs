@@ -1,4 +1,5 @@
 ﻿using System;
+
 namespace Wibblr.Metrics.Core
 {
     public class ProfilingEvent
