@@ -16,6 +16,5 @@ build:
   verbosity: minimal
 on_success:
 - cmd: dotnet pack Wibblr.Collections\Wibblr.Collections.csproj
-- cmd: 'appveyor PushArtifact **\*.nupkg'
 artifacts:
-- path: **\*.nupkg
+- path: '**\*.nupkg'
