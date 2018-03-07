@@ -20,4 +20,5 @@ build:
   parallel: true
   verbosity: minimal
 on_success:
-- cmd: appveyor PushArtifact Wibblr.Collections.nupkg
+- cmd: dotnet pack 
+- cmd: appveyor PushArtifact Wibblr.Collections.{version}.nupkg
