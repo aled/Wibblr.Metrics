@@ -22,7 +22,7 @@ namespace Wibblr.Collections.Tests
             var maxCapacity = 5;
             var q = new BatchedQueue<int>(batchSize, maxCapacity);
 
-            q.AsString().Should().Be("[]");
+            q.AsString().Should().Be("[()]");
 
             q.Enqueue(1);
             q.AsString().Should().Be("[(1)]");
