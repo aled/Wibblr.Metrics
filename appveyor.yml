@@ -13,9 +13,9 @@ build:
   verbosity: minimal
 after_build:
 - cmd: dotnet pack Wibblr.Collections\Wibblr.Collections.csproj
-- cmd: dotnet pack Wibblr.Collections\Wibblr.Metrics.Core.csproj
-- cmd: dotnet pack Wibblr.Collections\Wibblr.Metrics.CockroachDb.csproj
-- cmd: dotnet pack Wibblr.Collections\Wibblr.Metrics.SqlServer.csproj
+- cmd: dotnet pack Wibblr.Metrics.Core\Wibblr.Metrics.Core.csproj
+- cmd: dotnet pack Wibblr.Metrics.CockroachDb\Wibblr.Metrics.CockroachDb.csproj
+- cmd: dotnet pack Wibblr.Metrics.SqlServer\Wibblr.Metrics.SqlServer.csproj
 artifacts:
 - path: '**\*.nupkg'
 deploy:
