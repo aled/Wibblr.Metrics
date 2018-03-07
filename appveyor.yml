@@ -1,14 +1,11 @@
-version: 1.0.{build}
+version: 1.0.0.{build}
 image: Visual Studio 2017
 configuration: Release
 dotnet_csproj:
   patch: true
   file: '**\*.csproj'
   version: '{version}'
-  package_version: '{version}'
   assembly_version: '{version}'
-  file_version: '{version}'
-  informational_version: '{version}'
 before_build:
 - cmd: nuget restore
 build:
@@ -16,10 +13,13 @@ build:
   verbosity: minimal
 after_build:
 - cmd: dotnet pack Wibblr.Collections\Wibblr.Collections.csproj
+- cmd: dotnet pack Wibblr.Collections\Wibblr.Metrics.Core.csproj
+- cmd: dotnet pack Wibblr.Collections\Wibblr.Metrics.CockroachDb.csproj
+- cmd: dotnet pack Wibblr.Collections\Wibblr.Metrics.SqlServer.csproj
 artifacts:
 - path: '**\*.nupkg'
 deploy:
-  release: wibblr.metrics-v$(appveyor_build_version)
+  release: Wibblr.Metrics-v$(appveyor_build_version)
   description: 'Release description'
   provider: GitHub
   auth_token:
