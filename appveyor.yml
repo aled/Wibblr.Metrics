@@ -14,7 +14,7 @@ before_build:
 build:
   parallel: true
   verbosity: minimal
-on_success:
+after_build:
 - cmd: dotnet pack Wibblr.Collections\Wibblr.Collections.csproj
 artifacts:
 - path: '**\*.nupkg'
