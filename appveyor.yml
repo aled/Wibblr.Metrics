@@ -21,4 +21,4 @@ build:
   verbosity: minimal
 on_success:
 - cmd: dotnet pack 
-- cmd: appveyor PushArtifact Wibblr.Collections.{version}.nupkg
+- cmd: 'appveyor PushArtifact Wibblr.Collections.{version}.nupkg'
