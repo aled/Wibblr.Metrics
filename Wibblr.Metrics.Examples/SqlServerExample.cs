@@ -8,20 +8,23 @@ namespace Wibblr.Metrics.Examples
     {
         static void Main(string[] args)
         {
-            var connectionString = "Data Source=(local)\\SQLEXPRESS;Initial Catalog=Test;Integrated Security=SSPI";
-            var tableName = "MetricsCounter";
+            var database = "Metrics";
 
-            var sink = new SqlServerSink(connectionString, tableName);
-            using (var counterCollector = new MetricsCollector(sink, TimeSpan.FromMilliseconds(500), TimeSpan.FromMilliseconds(2000)))
+            var config = new SqlServerConfig
             {
-                Console.WriteLine("Press some keys; enter to exit");
-                char key;
-                do
-                {
-                    key = Console.ReadKey(true).KeyChar;
-                    counterCollector.IncrementCounter(key.ToString());
-                } while (key != '\r');
-            }
+                ConnectionString = $"Data Source=(local);Initial Catalog={database};Integrated Security=SSPI",
+                BatchSize = 5000,
+                MaxQueuedRows = 20000,
+                Database = database,
+                CounterTable = "Counter",
+                EventTable = "Event",
+                HistogramTable = "Histogram"
+            };
+
+            var sink = new SqlServerSink(config);
+            sink.EnsureTablesExist();
+
+            new KeyPressMonitor().Run(sink);
         }
     }
 }

@@ -1,13 +1,16 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text;
 
-namespace Wibblr.Metrics.CockroachDb
+namespace Wibblr.Metrics.Core
 {
-    public interface ICockroachDbConfig
+    public interface IDatabaseConfig
     {
         string ConnectionString { get; }
         string Database { get; }
         string CounterTable { get; }
         string HistogramTable { get; }
+        string EventTable { get; }
         int BatchSize { get; }
         int MaxQueuedRows { get; }
 

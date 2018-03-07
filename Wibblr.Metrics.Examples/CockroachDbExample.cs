@@ -15,6 +15,7 @@ namespace Wibblr.Metrics.Examples
                 Database = "test",
                 CounterTable = "MetricsCounter",
                 HistogramTable = "MetricsHistogram",
+                EventTable = "MetricsEvent",
                 BatchSize = 1000,
                 MaxQueuedRows = 10000
             }.Build();

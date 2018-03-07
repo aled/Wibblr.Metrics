@@ -9,20 +9,20 @@ namespace Wibblr.Metrics.CockroachDb
 {
     public class CockroachDbSink : IMetricsSink
     {
-        private ICockroachDbConfig config;
+        private IDatabaseConfig config;
 
         private Table counterTable;
         private Table histogramTable;
         private Table eventTable;
 
-        public CockroachDbSink(ICockroachDbConfig config)
+        public CockroachDbSink(IDatabaseConfig config)
         {
             if (!config.IsValid(out var validationErrors))
                 throw new ArgumentException($"Invalid config: { validationErrors.Join() }", nameof(config));
 
             counterTable = new Table(config.BatchSize, config.MaxQueuedRows)
             {
-                Name = "MetricsCounter",
+                Name = config.CounterTable,
                 Columns = new Column[] {
                     new Column{ Name = "Id", DataType = "UUID", DefaultFunction = "gen_random_uuid()" },
                     new Column{ Name = "CounterName", DataType = "VARCHAR(1000)" },
@@ -35,10 +35,10 @@ namespace Wibblr.Metrics.CockroachDb
 
             histogramTable = new Table(config.BatchSize, config.MaxQueuedRows)
             {
-                Name = "MetricsHistogram",
+                Name = config.HistogramTable,
                 Columns = new Column[] {
                     new Column{ Name = "Id", DataType = "UUID", DefaultFunction = "gen_random_uuid()" },
-                    new Column{ Name = "CounterName", DataType = "VARCHAR(1000)" },
+                    new Column{ Name = "HistogramName", DataType = "VARCHAR(1000)" },
                     new Column{ Name = "StartTime", DataType = "TIMESTAMP" },
                     new Column{ Name = "EndTime", DataType = "TIMESTAMP" },
                     new Column{ Name = "BucketFrom", DataType = "INT4" },
@@ -50,7 +50,7 @@ namespace Wibblr.Metrics.CockroachDb
 
             eventTable = new Table(config.BatchSize, config.MaxQueuedRows)
             {
-                Name = "MetricsEvent",
+                Name = config.EventTable,
                 Columns = new Column[] {
                     new Column{ Name = "Id", DataType = "UUID", DefaultFunction = "gen_random_uuid()" },
                     new Column{ Name = "EventName", DataType = "VARCHAR(1000)" },

@@ -9,8 +9,8 @@ namespace Wibblr.Metrics.Examples
         public void Run(IMetricsSink sink)
         {
             using (var metrics = new MetricsCollector(sink,
-                                                      windowSize: TimeSpan.FromSeconds(10),
-                                                      flushInterval: TimeSpan.FromSeconds(10),
+                                                      windowSize: TimeSpan.FromSeconds(1),
+                                                      flushInterval: TimeSpan.FromSeconds(2),
                                                       ignoreEmptyBuckets: true))
             {
                 metrics.RegisterThresholds("latency", new int[] { 0, 50, 75, 100, 1000, 2000, 10000 });
