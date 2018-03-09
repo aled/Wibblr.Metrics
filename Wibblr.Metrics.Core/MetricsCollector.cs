@@ -89,6 +89,9 @@ namespace Wibblr.Metrics.Core
         /// <param name="increment">Increment.</param>
         public void IncrementCounter(string name, long increment = 1)
         {
+            if (name.Length > 1000)
+                name = name.Substring(0, 1000);
+
             try
             {
                 var key = new Metric(name, new Window(clock.Current, windowSize));
@@ -114,6 +117,9 @@ namespace Wibblr.Metrics.Core
 
         public void IncrementBucket(string name, float value)
         {
+            if (name.Length > 1000)
+                name = name.Substring(0, 1000);
+
             try
             {
                 var key = new Metric(name, new Window(clock.Current, windowSize));
@@ -138,6 +144,9 @@ namespace Wibblr.Metrics.Core
 
         public void Event(string name)
         {
+            if (name.Length > 8000)
+                name = name.Substring(0, 8000);
+
             try
             {
                 var timestamp = DateTime.UtcNow;

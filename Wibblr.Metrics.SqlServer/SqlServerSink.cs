@@ -71,7 +71,7 @@ namespace Wibblr.Metrics.SqlServer
         {
             ExecuteSql($"CREATE TABLE {config.CounterTable} (Id BIGINT IDENTITY, CounterName VARCHAR(1000) NOT NULL, StartTime DATETIME2(7) NOT NULL, EndTime DATETIME2(7) NOT NULL, Count BIGINT NOT NULL, PRIMARY KEY(Id));");
             ExecuteSql($"CREATE TABLE {config.HistogramTable} (Id BIGINT IDENTITY, HistogramName VARCHAR(1000) NOT NULL, StartTime DATETIME2(7) NOT NULL, EndTime DATETIME2(7) NOT NULL, BucketFrom INT NOT NULL, BucketTo INT NOT NULL, Count BIGINT NOT NULL, PRIMARY KEY(Id));");
-            ExecuteSql($"CREATE TABLE {config.EventTable} (Id BIGINT IDENTITY, EventName VARCHAR(1000) NOT NULL, Timestamp DATETIME2(7) NOT NULL, PRIMARY KEY(Id));");
+            ExecuteSql($"CREATE TABLE {config.EventTable} (Id BIGINT IDENTITY, EventName VARCHAR(8000) NOT NULL, Timestamp DATETIME2(7) NOT NULL, PRIMARY KEY(Id));");
         }
 
         public void Flush(IEnumerable<WindowedCounter> counters)
