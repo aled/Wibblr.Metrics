@@ -1,10 +1,51 @@
-﻿using FluentAssertions;
+﻿using System;
+using FluentAssertions;
 using Xunit;
 
 namespace Wibblr.Metrics.Core.Tests
 {
     public class HistogramTests
     {
+        [Fact]
+        public void HistogramTimingTest()
+        {
+            var sink = new DictionarySink();
+            var clock = new DummyClock("12:00:00.000");
+            var windowSize = TimeSpan.FromSeconds(1);
+            var flushInterval = TimeSpan.FromSeconds(1);
+            var metrics = new MetricsCollector(sink, clock, windowSize, flushInterval, false);
+
+            metrics.RegisterThresholds("h", new[] { 0, 10, 20 });
+            metrics.RegisterThresholds("g", new[] { 30, 40 });
+
+            var window1 = new Window(clock.Current, windowSize);
+            metrics.IncrementBucket("h", 0);
+            clock.Advance(windowSize);
+            sink.Buckets[new Metric("h", window1)][(0, 10)].Should().Be(1);
+
+            var window2 = new Window(clock.Current, windowSize);
+            metrics.IncrementBucket("h", 10);
+            metrics.IncrementBucket("g", 29);
+            clock.Advance(windowSize);
+            sink.Buckets[new Metric("h", window1)][(0, 10)].Should().Be(1);
+            sink.Buckets[new Metric("h", window2)][(10, 20)].Should().Be(1);
+            sink.Buckets[new Metric("g", window2)][(int.MinValue, 30)].Should().Be(1);
+
+            var window3 = new Window(clock.Current, windowSize);
+            metrics.IncrementBucket("h", 10);
+            metrics.IncrementBucket("h", 11);
+            metrics.IncrementBucket("h", 20);
+            metrics.IncrementBucket("h", 21);
+            metrics.IncrementBucket("g", 30);
+            metrics.IncrementBucket("g", 31);
+            metrics.IncrementBucket("g", 40);
+            clock.Advance(windowSize);
+            sink.Buckets[new Metric("h", window3)][(10, 20)].Should().Be(2);
+            sink.Buckets[new Metric("h", window3)][(20, int.MaxValue)].Should().Be(2);
+            sink.Buckets[new Metric("g", window3)][(30, 40)].Should().Be(2);
+            sink.Buckets[new Metric("g", window3)][(40, int.MaxValue)].Should().Be(1);
+        }
+
         [Fact]
         public void HistogramTest()
         {
@@ -27,8 +68,6 @@ namespace Wibblr.Metrics.Core.Tests
             h.Percentile(0f).Should().Be(1.5f);
             h.Percentile(0.5f).Should().Be(2.375f); // halfway between 2.25 and 2.5
             h.Percentile(1f).Should().Be(2.75f);
-
-
         }
 
         [Fact]

@@ -10,7 +10,7 @@ namespace Wibblr.Metrics.Core.Tests
         public void Tests()
         {
             var sink = new DictionarySink();
-            var clock = new DummyClock();
+            var clock = new DummyClock("12:00:00");
 
             var metrics = new MetricsCollector(sink, TimeSpan.FromSeconds(5), TimeSpan.FromSeconds(30));
         }

@@ -8,15 +8,16 @@ namespace Wibblr.Metrics.Core.Tests
 {
     public class CounterTimingTests
     {
+        private static readonly TimeSpan oneSecond = TimeSpan.FromSeconds(1);
+
         [Fact]
         public void EventShouldFlushAtMultiplesOf5000ms()
         {
-            var clock = new DummyClock();
-            clock.Set("11:00:00.000");
+            var clock = new DummyClock("11:00:00.000");
 
             var sink = new DictionarySink();
 
-            using (var e = new MetricsCollector(sink, clock, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), false))
+            using (var e = new MetricsCollector(sink, clock, oneSecond, TimeSpan.FromSeconds(5), false))
             {
                 clock.Set("12:00:04.000");
                 e.IncrementCounter("myevent");
@@ -35,11 +36,10 @@ namespace Wibblr.Metrics.Core.Tests
         [Fact]
         public void ShouldFlushOnDispose()
         {
-            var clock = new DummyClock();
-            clock.Set("11:00:00.000");
+            var clock = new DummyClock("11:00:00.000");
             var sink = new DictionarySink();
 
-            using (var e = new MetricsCollector(sink, clock, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(5), false))
+            using (var e = new MetricsCollector(sink, clock, oneSecond, TimeSpan.FromSeconds(5), false))
             {
                 clock.Set("12:00:01.500");
 
@@ -51,7 +51,7 @@ namespace Wibblr.Metrics.Core.Tests
                     {
                         e.IncrementCounter($"myevent-{Thread.CurrentThread.ManagedThreadId}");
                     });
-                    clock.Add(TimeSpan.FromSeconds(1));
+                    clock.Advance(oneSecond);
                 }
             }
 

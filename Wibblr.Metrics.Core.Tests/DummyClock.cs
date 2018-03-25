@@ -8,11 +8,18 @@ namespace Wibblr.Metrics.Core.Tests
     {
         public DateTime Current { get; private set; }
 
+        private readonly string[] formats = { "HH:mm:ss.fff", "HH:mm:ss" };
+
         private bool Cancelled { get; set; } = false;
         private bool Started { get; set; } = false;
 
         private Action callback;
         private DateTime earliestExecutionTime;
+
+        public DummyClock(string initialTime)
+        {
+            Set(initialTime);
+        }
 
         public void SetDelayedAction(Action callback) => this.callback = callback;
 
@@ -29,21 +36,19 @@ namespace Wibblr.Metrics.Core.Tests
         public void ClockChanged()
         {
             if (Started && !Cancelled && Current >= earliestExecutionTime)
-            {
-                var task = new TaskFactory().StartNew(callback);
-                task.Wait();
-            }
+                new TaskFactory().StartNew(callback).GetAwaiter().GetResult();
         }
 
         public void Set(string time)
         {
-            Current = DateTime.ParseExact(time, "HH:mm:ss.fff", CultureInfo.InvariantCulture);
+            Current = DateTime.ParseExact(time, formats, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal);
             ClockChanged();
         }
 
-        public void Add(TimeSpan timeSpan)
+        public void Advance(TimeSpan timeSpan)
         {
             Current = Current.Add(timeSpan);
+            ClockChanged();
         }
     }
 }
