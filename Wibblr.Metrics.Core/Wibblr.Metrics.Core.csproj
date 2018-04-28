@@ -12,9 +12,6 @@
  
   <ItemGroup>
     <Folder Include="Properties\" />
-  </ItemGroup>
-  <ItemGroup>
-    <Compile Remove="IMeasurementCollector.cs" />
-    <Compile Remove="EventCollector.cs" />
+    <Folder Include="Sink\" />
   </ItemGroup>
 </Project>

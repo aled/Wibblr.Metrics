@@ -16,9 +16,10 @@ namespace Wibblr.Metrics.Examples
                 BatchSize = 5000,
                 MaxQueuedRows = 20000,
                 Database = database,
-                CounterTable = "Counter",
-                EventTable = "Event",
-                HistogramTable = "Histogram"
+                CounterTable = "MetricsCounter",
+                EventTable = "MetricsEvent",
+                HistogramTable = "MetricsHistogram",
+                ProfileTable = "MetricsProfile"
             };
 
             var sink = new SqlServerSink(config);

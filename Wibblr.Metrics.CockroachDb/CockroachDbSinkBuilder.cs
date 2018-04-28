@@ -14,6 +14,7 @@ namespace Wibblr.Metrics.CockroachDb
         public string CounterTable { get; set; }
         public string HistogramTable { get; set; }
         public string EventTable { get; set; }
+        public string ProfileTable { get; set; }
         public int BatchSize { get; set; }
         public int MaxQueuedRows { get; set; }
 
@@ -44,6 +45,9 @@ namespace Wibblr.Metrics.CockroachDb
 
             if (!EventTable.IsAlphanumeric())
                 validationErrors.Add("Event table must be alphanumeric");
+       
+            if (!ProfileTable.IsAlphanumeric())
+                validationErrors.Add("Profile table must be alphanumeric");
 
             return validationErrors.IsEmpty();
         }

@@ -202,5 +202,10 @@ namespace Wibblr.Metrics.SqlServer
                 Console.WriteLine(e.Message);
             }
         }
+
+        public void Flush(IEnumerable<Profile> profiles)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

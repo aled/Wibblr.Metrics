@@ -8,9 +8,12 @@ namespace Wibblr.Metrics.Core
     {
         string ConnectionString { get; }
         string Database { get; }
+
         string CounterTable { get; }
         string HistogramTable { get; }
         string EventTable { get; }
+        string ProfileTable { get; }
+
         int BatchSize { get; }
         int MaxQueuedRows { get; }
 

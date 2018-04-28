@@ -10,9 +10,11 @@ namespace Wibblr.Metrics.SqlServer
         public string CounterTable { get; set; }
         public string HistogramTable { get; set; }
         public string EventTable { get; set; }
+        public string ProfileTable { get; set; }
+    
         public int BatchSize { get; set; }
         public int MaxQueuedRows { get; set; }
-        
+
         public bool IsValid(out List<string> validationErrors)
         {
             validationErrors = new List<string>();

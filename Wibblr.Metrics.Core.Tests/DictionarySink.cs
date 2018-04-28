@@ -49,5 +49,10 @@ namespace Wibblr.Metrics.Core.Tests
         {
             throw new NotImplementedException();
         }
+
+        public void Flush(IEnumerable<Profile> profiles)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

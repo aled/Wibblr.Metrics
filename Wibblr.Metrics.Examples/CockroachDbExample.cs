@@ -9,13 +9,14 @@ namespace Wibblr.Metrics.Examples
             var sink = new CockroachDbSinkBuilder
             {
                 Host = "192.168.0.7",
-                Port = 26257,
+                Port = 26261,
                 Username = "root",
                 Password = "",
                 Database = "test",
                 CounterTable = "MetricsCounter",
                 HistogramTable = "MetricsHistogram",
                 EventTable = "MetricsEvent",
+                ProfileTable = "MetricsProfile",
                 BatchSize = 1000,
                 MaxQueuedRows = 10000
             }.Build();

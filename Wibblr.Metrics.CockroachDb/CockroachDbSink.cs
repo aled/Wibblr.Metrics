@@ -14,6 +14,7 @@ namespace Wibblr.Metrics.CockroachDb
         private Table counterTable;
         private Table histogramTable;
         private Table eventTable;
+        private Table profileTable;
 
         public CockroachDbSink(IDatabaseConfig config)
         {
@@ -59,6 +60,21 @@ namespace Wibblr.Metrics.CockroachDb
                 PrimaryKey = "Id",       
             };
 
+            profileTable = new Table(config.BatchSize, config.MaxQueuedRows)
+            {
+                Name = config.ProfileTable,
+                Columns = new Column[] {
+                    new Column{ Name = "Id", DataType = "UUID", DefaultFunction = "gen_random_uuid()" },
+                    new Column{ Name = "SessionId", DataType = "VARCHAR(8000)" },
+                    new Column{ Name = "ProfileName", DataType = "VARCHAR(8000)" },
+                    new Column{ Name = "Process", DataType = "INT4" },
+                    new Column{ Name = "Thread", DataType = "VARCHAR(200)" },
+                    new Column{ Name = "Timestamp", DataType = "TIMESTAMP" },
+                    new Column{ Name = "TimestampType", DataType = "CHAR" },
+                },
+                PrimaryKey = "Id",
+            };
+
             this.config = config;
         }
 
@@ -82,6 +98,9 @@ namespace Wibblr.Metrics.CockroachDb
                     cmd.ExecuteNonQuery();
 
                     cmd.CommandText = eventTable.CreateTableSql(config.Database);
+                    cmd.ExecuteNonQuery();
+
+                    cmd.CommandText = profileTable.CreateTableSql(config.Database);
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -121,6 +140,21 @@ namespace Wibblr.Metrics.CockroachDb
                 events.Select(e => new object[] { 
                     e.name, 
                     e.timestamp }));
+        }
+
+        public void Flush(IEnumerable<Profile> profiles)
+        {
+            profileTable.Insert(
+                config.Database,
+                config.ConnectionString,
+                profiles.SelectMany(p => 
+                    p.timestamps.Select(t => new object[] {
+                        p.sessionId,
+                        p.name,
+                        p.process,
+                        p.thread,
+                        t.Item1,
+                        t.Item2 ? 'S' : 'E' })));
         }
     }
 }

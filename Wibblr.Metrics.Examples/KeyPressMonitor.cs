@@ -28,6 +28,12 @@ namespace Wibblr.Metrics.Examples
                     metrics.IncrementBucket("latency", stopwatch.ElapsedMilliseconds);
                     metrics.Event(key.ToString());
 
+                    // letters a-z: lowercase is start of interval, uppercase is end.
+                    if (key >= 'a' && key <= 'z')
+                        metrics.StartInterval("session", key.ToString());
+                    else if (key >= 'A' && key <= 'Z')
+                        metrics.EndInterval("session", key.ToString().ToLower());
+             
                     stopwatch.Reset();
 
                 } while (key != '\r' && key != '\n');

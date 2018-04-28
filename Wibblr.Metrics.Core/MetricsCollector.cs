@@ -25,7 +25,7 @@ namespace Wibblr.Metrics.Core
         private readonly Dictionary<string, List<DateTime>> events = new Dictionary<string, List<DateTime>>();
         private readonly object eventsLock = new object();
 
-        private readonly Dictionary<string, ProfilingSession> profiles = new Dictionary<string, ProfilingSession>();
+        private readonly Dictionary<ProfileKey, ProfileData> profileData = new Dictionary<ProfileKey, ProfileData>();
         private readonly object profileLock = new object();
 
         private TimeSpan windowSize;
@@ -82,6 +82,7 @@ namespace Wibblr.Metrics.Core
         public MetricsCollector(IMetricsSink sink)
             : this(sink, new Clock(), TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(60), false) { }
 
+        #region Counters
         /// <summary>
         /// Increments a counter.
         /// </summary>
@@ -109,7 +110,9 @@ namespace Wibblr.Metrics.Core
                 Console.Error.WriteLine(e.Message);
             }
         }
+        #endregion Counters
 
+        #region Histograms
         public void RegisterThresholds(string histogramName, int[] thresholds)
         {
             thresholdDict[histogramName] = thresholds;
@@ -141,7 +144,9 @@ namespace Wibblr.Metrics.Core
                 Console.Error.WriteLine(e.Message);
             }
         }
+        #endregion Histograms
 
+        #region Events
         public void Event(string name)
         {
             if (name.Length > 8000)
@@ -164,23 +169,53 @@ namespace Wibblr.Metrics.Core
                 Console.Error.WriteLine(e.Message);
             }
         }
+        #endregion Events
+
+        #region Profile
+        /// <summary>
+        /// Used to profile a block of code (by putting it in a 'using' statement)
+        /// </summary>
+        public IDisposable Profile(string sessionId, string name)
+        {
+            return new ProfileIntervalBuilder(this, sessionId, name, clock.Current);
+        }
 
         /// <summary>
-        /// Used to profile a block of code (by putting it in a Using statement)
-        /// At the end of the Using block
+        /// Record the start timestamp of an interval.
         /// </summary>
-        public IDisposable GetProfiler(string sessionId, string name)
+        /// <param name="sessionId">Session identifier.</param>
+        /// <param name="name">Name.</param>
+        public void StartInterval(string sessionId, string name)
         {
-            return new ProfilingIntervalBuilder(this, sessionId, name); 
-        }
-
-        public void ProfileInterval(ProfilingInterval profilingInterval)
-        {
+            var key = new ProfileKey(sessionId, name);
             lock (profileLock)
             {
+                if (!profileData.TryGetValue(key, out ProfileData data))
+                    data = new ProfileData();
                 
+                data.AddStart(clock.Current);
+                profileData[key] = data;
+            } 
+        }
+
+        /// <summary>
+        /// Record the end timestamp of an interval.
+        /// </summary>
+        /// <param name="sessionId">Session identifier.</param>
+        /// <param name="name">Name.</param>
+        public void EndInterval(string sessionId, string name)
+        {
+            var key = new ProfileKey(sessionId, name);
+            lock (profileLock)
+            {
+                if (!profileData.TryGetValue(key, out ProfileData data))
+                    data = new ProfileData();
+
+                data.AddEnd(clock.Current);
+                profileData[key] = data;
             }
         }
+        #endregion Profiler
 
         /// <summary>
         /// Flush this instance.
@@ -193,6 +228,7 @@ namespace Wibblr.Metrics.Core
                 var tempCounters = new List<WindowedCounter>();
                 var tempBuckets = new List<WindowedBucket>();
                 var tempEvents = new List<TimestampedEvent>();
+                var tempProfiles = new List<Profile>();
 
                 // Any events that are recorded after this line will have a start time equal
                 // or later to this.
@@ -218,6 +254,11 @@ namespace Wibblr.Metrics.Core
                     }
                 }
 
+                // Flush even if there are no events, so that any queued events
+                // in the sink are flushed.
+                if (tempCounters != null)
+                    sink.Flush(tempCounters);
+
                 lock (histogramsLock)
                 {
                     foreach (var h in histograms.Keys.ToList())
@@ -242,14 +283,16 @@ namespace Wibblr.Metrics.Core
                         }
                     }
                 }
+                if (tempBuckets != null)
+                    sink.Flush(tempBuckets);
 
                 lock (eventsLock)
                 {
-                    foreach (var name in events.Keys.ToList())
+                    foreach (var name in events.Keys)
                     {
                         foreach (var timestamp in events[name])
                         {
-                            tempEvents.Add(new TimestampedEvent()
+                            tempEvents.Add(new TimestampedEvent
                             {
                                 name = name,
                                 timestamp = timestamp
@@ -258,17 +301,27 @@ namespace Wibblr.Metrics.Core
                     }
                     events.Clear();
                 }
-
-                // Flush even if there are no events, so that any queued events
-                // in the sink are flushed.
-                if (tempCounters != null)
-                    sink.Flush(tempCounters);
-
-                if (tempBuckets != null)
-                    sink.Flush(tempBuckets);
-
                 if (tempEvents != null)
                     sink.Flush(tempEvents);
+
+                lock (profileLock)
+                {
+                    foreach (var key in profileData.Keys)
+                    {
+                        tempProfiles.Add(new Profile
+                        {
+                            sessionId = key.sessionId,
+                            name = key.name,
+                            process = key.process,
+                            thread = key.thread,
+                            timestamps = new List<(DateTime, bool)>(profileData[key].timestamps),
+                        });
+                    }
+                    profileData.Clear();
+                }
+
+                if (tempProfiles != null)
+                    sink.Flush(tempProfiles);
             }
             catch (Exception e)
             {
