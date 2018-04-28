@@ -2,21 +2,21 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio 15
 VisualStudioVersion = 15.0.27130.2020
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.Core", "Wibblr.Metrics.Core\Wibblr.Metrics.Core.csproj", "{EEB92ACA-5EAB-48A0-90F1-0AA4F45886AE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Metrics.Core", "Wibblr.Metrics.Core\Wibblr.Metrics.Core.csproj", "{EEB92ACA-5EAB-48A0-90F1-0AA4F45886AE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.Core.Tests", "Wibblr.Metrics.Core.Tests\Wibblr.Metrics.Core.Tests.csproj", "{976BF913-3D75-4843-B6BB-EAB34C5D62CE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Metrics.Core.Tests", "Wibblr.Metrics.Core.Tests\Wibblr.Metrics.Core.Tests.csproj", "{976BF913-3D75-4843-B6BB-EAB34C5D62CE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.Examples", "Wibblr.Metrics.Examples\Wibblr.Metrics.Examples.csproj", "{02442FA6-D5F7-4222-9E23-84546AD9152F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Metrics.Examples", "Wibblr.Metrics.Examples\Wibblr.Metrics.Examples.csproj", "{02442FA6-D5F7-4222-9E23-84546AD9152F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.SqlServer", "Wibblr.Metrics.SqlServer\Wibblr.Metrics.SqlServer.csproj", "{D41D0B2C-CEA1-4E35-9E90-3FC74334C6D1}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Metrics.SqlServer", "Wibblr.Metrics.SqlServer\Wibblr.Metrics.SqlServer.csproj", "{D41D0B2C-CEA1-4E35-9E90-3FC74334C6D1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.CockroachDb", "Wibblr.Metrics.CockroachDb\Wibblr.Metrics.CockroachDb.csproj", "{E52DE0E0-1F35-4674-ACE2-5822CDEE221D}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Metrics.CockroachDb", "Wibblr.Metrics.CockroachDb\Wibblr.Metrics.CockroachDb.csproj", "{E52DE0E0-1F35-4674-ACE2-5822CDEE221D}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Collections", "Wibblr.Collections\Wibblr.Collections.csproj", "{33E57254-5B1D-4952-AB2E-EC75AFEF1D5F}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Collections", "Wibblr.Collections\Wibblr.Collections.csproj", "{33E57254-5B1D-4952-AB2E-EC75AFEF1D5F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Collections.Tests", "Wibblr.Collections.Tests\Wibblr.Collections.Tests.csproj", "{4EFFF141-D4D8-4C27-917C-0B0D26EFA6CE}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Collections.Tests", "Wibblr.Collections.Tests\Wibblr.Collections.Tests.csproj", "{4EFFF141-D4D8-4C27-917C-0B0D26EFA6CE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.Benchmarks", "Wibblr.Metrics.Benchmarks\Wibblr.Metrics.Benchmarks.csproj", "{C724CC1D-A9EE-4D12-B0DD-F1FA38E3FC38}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Metrics.Benchmarks", "Wibblr.Metrics.Benchmarks\Wibblr.Metrics.Benchmarks.csproj", "{C724CC1D-A9EE-4D12-B0DD-F1FA38E3FC38}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{842526E3-3297-45E9-AC10-334F7F92708D}"
 	ProjectSection(SolutionItems) = preProject

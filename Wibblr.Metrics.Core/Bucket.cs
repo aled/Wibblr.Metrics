@@ -1,4 +1,4 @@
-﻿namespace Wibblr.Metrics.Core
+namespace Wibblr.Metrics.Core
 {
     public struct Bucket
     {
