@@ -12,7 +12,7 @@ namespace Wibblr.Metrics.CockroachDb
     public class Table
     {
         public string Name { get; set; }
-        public Column[] Columns { get; set; }
+        public List<Column> Columns { get; set; }
         public string PrimaryKey { get; set; }
 
         private int batchSize;
@@ -28,29 +28,14 @@ namespace Wibblr.Metrics.CockroachDb
             queue = new BatchedQueue<object[]>(batchSize, maxQueuedRows);
         }
 
-        public string CreateTableSql(string database)
-        {
-            var sb = new StringBuilder(1024);
-            sb.AppendLine($"CREATE TABLE IF NOT EXISTS {database}.{Name} (");
-
-            foreach (var c in Columns)
-                sb.Append($"\n  {c},");
-
-            sb.Append($"\n  PRIMARY KEY({PrimaryKey})");
-            sb.Append("\n);");
-
-            return sb.ToString();
-        }
+        public string CreateTableSql(string database) =>
+        $"CREATE TABLE IF NOT EXISTS {database}.{Name}\n(\n  {string.Join(",\n  ", Columns)},\n  PRIMARY KEY({PrimaryKey})\n);";
 
         private IEnumerable<string> InsertColumns
         {
-            get => Columns.Where(c => string.IsNullOrEmpty(c.DefaultFunction))
-                          .Select(c => c.Name);
-        }
-
-        private string InsertColumnsClause
-        {
-            get => string.Join(", ", InsertColumns);
+            get => Columns
+                .Where(c => string.IsNullOrEmpty(c.DefaultFunction))
+                .Select(c => c.Name);
         }
 
         public NpgsqlCommand GetInsertCommand(string database, IEnumerable<object[]> batch)
@@ -61,9 +46,9 @@ namespace Wibblr.Metrics.CockroachDb
             foreach (var (item, i) in batch.ZipWithIndex())
             {
                 if (i == 0)
-                    sql.Append($"INSERT INTO {database}.{Name} ({InsertColumnsClause}) VALUES\n");
+                    sql.Append($"INSERT INTO {database}.{Name} (\n  {string.Join(",\n  ", InsertColumns)}) VALUES\n  ");
                  else
-                    sql.Append(",\n");
+                    sql.Append(",\n  ");
 
                 sql.Append("(");
                 for (int j = 0; j < InsertColumns.Count(); j++)

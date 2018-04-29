@@ -10,7 +10,7 @@ namespace Wibblr.Metrics.Core
         public int process;
         public string thread;
 
-        // true = start of interval, false = end of interval
-        public List<(DateTime, bool)> timestamps;
+        // 'B' = beginning of interval, 'E' = end of interval
+        public List<(DateTime, char)> timestamps;
     }
 }

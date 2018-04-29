@@ -8,10 +8,10 @@
 
         private string DefaultClause
         {
-            get => string.IsNullOrEmpty(DefaultFunction) ? "" : $"DEFAULT {DefaultFunction}";
+            get => string.IsNullOrEmpty(DefaultFunction) ? "" : $" DEFAULT {DefaultFunction}";
         }
 
         public override string ToString() =>
-            $"{Name} {DataType} {DefaultClause}";
+            $"{Name} {DataType}{DefaultClause}";
     }
 }

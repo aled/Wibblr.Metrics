@@ -314,7 +314,7 @@ namespace Wibblr.Metrics.Core
                             name = key.name,
                             process = key.process,
                             thread = key.thread,
-                            timestamps = new List<(DateTime, bool)>(profileData[key].timestamps),
+                            timestamps = new List<(DateTime, char)>(profileData[key].timestamps),
                         });
                     }
                     profileData.Clear();

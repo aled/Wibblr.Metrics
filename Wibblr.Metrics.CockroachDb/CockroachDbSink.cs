@@ -24,7 +24,7 @@ namespace Wibblr.Metrics.CockroachDb
             counterTable = new Table(config.BatchSize, config.MaxQueuedRows)
             {
                 Name = config.CounterTable,
-                Columns = new Column[] {
+                Columns = new List<Column> {
                     new Column{ Name = "Id", DataType = "UUID", DefaultFunction = "gen_random_uuid()" },
                     new Column{ Name = "CounterName", DataType = "VARCHAR(8000)" },
                     new Column{ Name = "StartTime", DataType = "TIMESTAMP" },
@@ -37,7 +37,7 @@ namespace Wibblr.Metrics.CockroachDb
             histogramTable = new Table(config.BatchSize, config.MaxQueuedRows)
             {
                 Name = config.HistogramTable,
-                Columns = new Column[] {
+                Columns = new List<Column> {
                     new Column{ Name = "Id", DataType = "UUID", DefaultFunction = "gen_random_uuid()" },
                     new Column{ Name = "HistogramName", DataType = "VARCHAR(8000)" },
                     new Column{ Name = "StartTime", DataType = "TIMESTAMP" },
@@ -52,7 +52,7 @@ namespace Wibblr.Metrics.CockroachDb
             eventTable = new Table(config.BatchSize, config.MaxQueuedRows)
             {
                 Name = config.EventTable,
-                Columns = new Column[] {
+                Columns = new List<Column> {
                     new Column{ Name = "Id", DataType = "UUID", DefaultFunction = "gen_random_uuid()" },
                     new Column{ Name = "EventName", DataType = "VARCHAR(8000)" },
                     new Column{ Name = "Timestamp", DataType = "TIMESTAMP" }
@@ -63,7 +63,7 @@ namespace Wibblr.Metrics.CockroachDb
             profileTable = new Table(config.BatchSize, config.MaxQueuedRows)
             {
                 Name = config.ProfileTable,
-                Columns = new Column[] {
+                Columns = new List<Column> {
                     new Column{ Name = "Id", DataType = "UUID", DefaultFunction = "gen_random_uuid()" },
                     new Column{ Name = "SessionId", DataType = "VARCHAR(8000)" },
                     new Column{ Name = "ProfileName", DataType = "VARCHAR(8000)" },
@@ -154,7 +154,7 @@ namespace Wibblr.Metrics.CockroachDb
                         p.process,
                         p.thread,
                         t.Item1,
-                        t.Item2 ? 'S' : 'E' })));
+                        t.Item2 })));
         }
     }
 }
