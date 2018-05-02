@@ -25,7 +25,7 @@ namespace Wibblr.Metrics.Core
         private readonly Dictionary<string, List<DateTime>> events = new Dictionary<string, List<DateTime>>();
         private readonly object eventsLock = new object();
 
-        private readonly Dictionary<ProfileKey, ProfileData> profileData = new Dictionary<ProfileKey, ProfileData>();
+        private readonly List<Profile> profileData = new List<Profile>();
         private readonly object profileLock = new object();
 
         private TimeSpan windowSize;
@@ -177,7 +177,7 @@ namespace Wibblr.Metrics.Core
         /// </summary>
         public IDisposable Profile(string sessionId, string name)
         {
-            return new ProfileIntervalBuilder(this, sessionId, name, clock.Current);
+            return new ProfileIntervalBuilder(this, sessionId, name);
         }
 
         /// <summary>
@@ -187,14 +187,9 @@ namespace Wibblr.Metrics.Core
         /// <param name="name">Name.</param>
         public void StartInterval(string sessionId, string name)
         {
-            var key = new ProfileKey(sessionId, name);
             lock (profileLock)
             {
-                if (!profileData.TryGetValue(key, out ProfileData data))
-                    data = new ProfileData();
-                
-                data.AddStart(clock.Current);
-                profileData[key] = data;
+                profileData.Add(new Profile(sessionId, name, clock.Current, 'B'));
             } 
         }
 
@@ -205,14 +200,18 @@ namespace Wibblr.Metrics.Core
         /// <param name="name">Name.</param>
         public void EndInterval(string sessionId, string name)
         {
-            var key = new ProfileKey(sessionId, name);
             lock (profileLock)
             {
-                if (!profileData.TryGetValue(key, out ProfileData data))
-                    data = new ProfileData();
+                profileData.Add(new Profile(sessionId, name, clock.Current, 'E'));
+            } 
+        }
 
-                data.AddEnd(clock.Current);
-                profileData[key] = data;
+        public void ProfileEvent(string sessionId, string name)
+        {
+            lock (profileLock)
+            {
+                profileData.Add(new Profile(sessionId, name, clock.Current, 'i'));
+            
             }
         }
         #endregion Profiler
@@ -306,19 +305,9 @@ namespace Wibblr.Metrics.Core
 
                 lock (profileLock)
                 {
-                    foreach (var key in profileData.Keys)
-                    {
-                        tempProfiles.Add(new Profile
-                        {
-                            sessionId = key.sessionId,
-                            name = key.name,
-                            process = key.process,
-                            thread = key.thread,
-                            timestamps = new List<(DateTime, char)>(profileData[key].timestamps),
-                        });
-                    }
-                    profileData.Clear();
+                    tempProfiles = new List<Profile>(profileData);
                 }
+                profileData.Clear();
 
                 if (tempProfiles != null)
                     sink.Flush(tempProfiles);

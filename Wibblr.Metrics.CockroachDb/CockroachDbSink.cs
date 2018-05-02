@@ -70,7 +70,7 @@ namespace Wibblr.Metrics.CockroachDb
                     new Column{ Name = "Process", DataType = "INT4" },
                     new Column{ Name = "Thread", DataType = "VARCHAR(200)" },
                     new Column{ Name = "Timestamp", DataType = "TIMESTAMP" },
-                    new Column{ Name = "TimestampType", DataType = "CHAR" },
+                    new Column{ Name = "Phase", DataType = "CHAR" },
                 },
                 PrimaryKey = "Id",
             };
@@ -147,14 +147,13 @@ namespace Wibblr.Metrics.CockroachDb
             profileTable.Insert(
                 config.Database,
                 config.ConnectionString,
-                profiles.SelectMany(p => 
-                    p.timestamps.Select(t => new object[] {
+                profiles.Select(p => new object[] {
                         p.sessionId,
                         p.name,
                         p.process,
                         p.thread,
-                        t.Item1,
-                        t.Item2 })));
+                        p.timestamp,
+                        p.phase }));
         }
     }
 }

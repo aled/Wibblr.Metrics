@@ -1,8 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using Newtonsoft.Json;
 
 namespace Wibblr.Metrics.Core
 {
@@ -11,77 +9,74 @@ namespace Wibblr.Metrics.Core
     /// </summary>
     public class FileSink : IMetricsSink
     {
-        private FileSinkOptions options;
+        private IMetricsSerializer serializer;
 
-        public FileSink(FileSinkOptions options = null)
+        public FileSink(IMetricsSerializer serializer)
         {
-            this.options = options ?? new FileSinkOptions();
+            this.serializer = serializer;
         }
 
         public void Flush(IEnumerable<WindowedCounter> counters)
         {
-            //throw new NotImplementedException();
         }
 
         public void Flush(IEnumerable<WindowedBucket> buckets)
         {
-            //throw new NotImplementedException();
         }
 
         public void Flush(IEnumerable<TimestampedEvent> events)
         {
-            
-        }
-
-        public IEnumerable<string> SerializeProfiles(IGrouping<string, Profile> group)
-        {
-            foreach (var p in group)
-                foreach (var t in p.timestamps)
-                    yield return JsonConvert.SerializeObject(
-                        new Dictionary<string, object>
-                        {
-                            {"name", p.name},
-                            {"ph", t.Item2.ToString()},
-                            {"ts", t.Item1.Ticks / 10},
-                            {"pid", p.process},
-                            {"tid", int.Parse(p.thread)}
-                        });
         }
 
         public void Flush(IEnumerable<Profile> profiles)
         {
-            var profilesLookup = profiles.ToLookup(p => p.sessionId);
+            // Assume profiles are in time order (at least for all events on a single thread)
+            // as required by the chrometracing spec.
+            var writers = new Dictionary<string, TextWriter>();
 
-            foreach (var group in profilesLookup)
-                Write($"{group.Key}.chrometracing.json", SerializeProfiles(group));      
-        }
-
-        private void Write(string fileName, IEnumerable<string> rows)
-        {
             try
             {
-                using (var stream = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite))
+                foreach (var p in profiles)
                 {
-                    using (var writer = new StreamWriter(stream))
+                    try
                     {
-                        var len = stream.Length;
-                        if (len == 0)
-                            writer.WriteLine("[");
-                        else
-                            stream.Seek(len, SeekOrigin.Begin);
-
-                        foreach (var row in rows)
+                        if (!writers.TryGetValue(p.sessionId, out var writer))
                         {
-                            writer.Write(row);
-                            writer.WriteLine(",");
+                            writer = Open(p.sessionId);
+                            writers[p.sessionId] = writer;
                         }
+
+                        if (writer != null)
+                            serializer.WriteProfile(p, writer);
+                    }
+                    catch (IOException)
+                    {
+                        // on error, stop writing to this particular file
+                        writers[p.sessionId] = null;   
                     }
                 }
             }
-            catch (IOException)
-            { 
-                // TODO: something
+            finally
+            {
+                foreach (var writer in writers.Values)
+                    writer.Close();                
             }
+        }
+
+        private TextWriter Open(string sessionId)
+        {
+            var fileName = $"{sessionId}.chrometracing.json";
+            var stream = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            var writer = new StreamWriter(stream);
+
+            var len = stream.Length;
+
+            if (len == 0)
+                serializer.WriteProfileHeader(writer);
+            else
+                stream.Seek(len, SeekOrigin.Begin);
+            
+            return writer;
         }
     }
 }

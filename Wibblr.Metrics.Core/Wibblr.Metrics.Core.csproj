@@ -13,6 +13,7 @@
   <ItemGroup>
     <Folder Include="Properties\" />
     <Folder Include="Sink\" />
+    <Folder Include="Sink\Serialization\" />
   </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="11.0.2" />

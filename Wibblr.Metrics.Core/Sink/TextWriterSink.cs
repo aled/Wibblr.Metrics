@@ -77,7 +77,7 @@ namespace Wibblr.Metrics.Core
             var lines = new List<string>();
 
             foreach (var p in profiles)
-                lines.Add($"P {Printable(p.name)} {string.Join(" ", p.timestamps.Select(t => t.Item2 + t.Item1.ToString("mm:ss.fff")))}");
+                lines.Add($"P {Printable(p.name)} {p.phase} {p.timestamp.ToString("mm:ss.fff")}");
 
             if (lines.Any())
             {

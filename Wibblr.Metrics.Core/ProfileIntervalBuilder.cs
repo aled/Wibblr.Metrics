@@ -10,7 +10,7 @@ namespace Wibblr.Metrics.Core
         private string sessionId;
         private string name;
        
-        internal ProfileIntervalBuilder(MetricsCollector metrics, string sessionId, string name, DateTime timestamp)
+        internal ProfileIntervalBuilder(MetricsCollector metrics, string sessionId, string name)
         {
             this.metrics = metrics;
             this.sessionId = sessionId;
