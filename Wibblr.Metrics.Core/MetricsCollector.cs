@@ -319,8 +319,8 @@ namespace Wibblr.Metrics.Core
 
             try
             {
-                if (!clock.IsDelayedActionCancelled())
-                    clock.ExecuteAfterDelay(flushInterval); 
+                // this will have no effect if the clock is in the process of cancelling
+                clock.ExecuteAfterDelay(flushInterval); 
             }
             catch (Exception e)
             {

@@ -13,5 +13,31 @@ namespace Wibblr.Collections
             items.RemoveRange(index, numItemsToRemove);
             return numItemsToRemove;
         }
+
+        public static LookAheadEnumerator<T> GetLookAheadEnumerator<T>(this IEnumerable<T> items)
+        {
+            return new LookAheadEnumerator<T>(items);
+        }
+
+        private static IEnumerable<T> TakeUntil<T>(this LookAheadEnumerator<T> e, Func<T, T, bool> predicate)
+        {
+            while (e.HasCurrent)
+            {
+                yield return e.Current;
+
+                if (e.HasNext && predicate(e.Current, e.Next))
+                    break;
+
+                e.MoveNext();
+            }
+        }
+
+        public static IEnumerable<IEnumerable<T>> Partition<T>(this IEnumerable<T> items, Func<T, T, bool> partitionPredicate)
+        {
+            var enumerator = items.GetLookAheadEnumerator();
+
+            while (enumerator.MoveNext())
+                yield return enumerator.TakeUntil(partitionPredicate);
+        }
     }
 }

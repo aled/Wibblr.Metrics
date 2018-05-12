@@ -14,7 +14,7 @@ namespace Wibblr.Metrics.Examples
         static void Main(string[] args)
         {
             using (metrics = new MetricsCollector(
-                new FileSink(new ChromeTracingSerializer()),
+                new FileSink(new ChromeTracingSerializer(), new SessionIdNamingStrategy()),
                 windowSize: TimeSpan.FromSeconds(1),
                 flushInterval: TimeSpan.FromSeconds(1),
                 ignoreEmptyBuckets: true))

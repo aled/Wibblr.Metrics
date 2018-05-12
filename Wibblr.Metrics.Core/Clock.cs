@@ -6,6 +6,7 @@ namespace Wibblr.Metrics.Core
     internal class Clock : IClock
     {
         private Timer timer;
+        private ManualResetEvent cancelRequested;
         private ManualResetEvent isCancelled;
         private object disposeLock = new object();
 
@@ -21,6 +22,7 @@ namespace Wibblr.Metrics.Core
         public void SetDelayedAction(Action callback)
         {
             timer = new Timer(o => callback(), null, Timeout.Infinite, Timeout.Infinite);
+            cancelRequested = new ManualResetEvent(false);
             isCancelled = new ManualResetEvent(false);
         }
 
@@ -37,11 +39,10 @@ namespace Wibblr.Metrics.Core
             if (delay > int.MaxValue)
                 delay = int.MaxValue;
 
-            // need to synchronize this call, in case the timer is disposed
-            // by the time we call the Change() method
+            // ensure we do not call timer.Change after it has been disposed.
             lock (disposeLock)
             {
-                if (!IsDelayedActionCancelled())
+                if (!cancelRequested.WaitOne(0))
                     timer.Change((int)delay, Timeout.Infinite);
             }
         }
@@ -51,14 +52,17 @@ namespace Wibblr.Metrics.Core
         /// </summary>
         public void CancelDelayedAction()
         {
-            lock (disposeLock)
+            if (!cancelRequested.WaitOne(0))
             {
-                if (!IsDelayedActionCancelled())
+                cancelRequested.Set();
+
+                lock (disposeLock)
                 {
                     timer.Change(Timeout.Infinite, Timeout.Infinite);
                     timer.Dispose(isCancelled);
-                    isCancelled.WaitOne(Timeout.Infinite);
                 }
+
+                isCancelled.WaitOne(Timeout.Infinite);
             }
         }
 
