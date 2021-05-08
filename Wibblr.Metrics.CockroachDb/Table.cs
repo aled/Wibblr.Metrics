@@ -29,7 +29,7 @@ namespace Wibblr.Metrics.CockroachDb
         }
 
         public string CreateTableSql(string database) =>
-        $"CREATE TABLE IF NOT EXISTS {database}.{Name}\n(\n  {string.Join(",\n  ", Columns)},\n  PRIMARY KEY({PrimaryKey})\n);";
+            $"CREATE TABLE IF NOT EXISTS {database}.{Name}\n(\n  {string.Join(",\n  ", Columns)},\n  PRIMARY KEY({PrimaryKey})\n);";
 
         private IEnumerable<string> InsertColumns
         {

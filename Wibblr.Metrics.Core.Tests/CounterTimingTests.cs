@@ -24,12 +24,12 @@ namespace Wibblr.Metrics.Core.Tests
 
                 // should not fire event yet
                 clock.Set("12:00:04.999");
-                Assert.Equal(0, sink.Counters.Count);
+                Assert.Empty(sink.Counters);
 
                 clock.Set("12:00:05.000");
 
                 // should now fire event on another thread and then return
-                Assert.Equal(1, sink.Counters.Count);
+                Assert.Single(sink.Counters);
             }
         }
 

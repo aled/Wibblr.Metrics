@@ -11,6 +11,10 @@ namespace Wibblr.Metrics.CockroachDb
         public string Username { get; set; }
         public string Password { get; set; }
         public string Database { get; set; }
+
+        public bool RequireSsl { get; set; }
+        public string CaCertFile { get; set; }
+
         public string CounterTable { get; set; }
         public string HistogramTable { get; set; }
         public string EventTable { get; set; }
@@ -26,16 +30,18 @@ namespace Wibblr.Metrics.CockroachDb
                 Port = Port,
                 Username = Username,
                 Password = Password,
-                Database = Database
+                Database = Database,
+                SslMode = RequireSsl ? SslMode.Require : SslMode.Prefer,
+                RootCertificate = CaCertFile
             }.ConnectionString;
         }
-         
+
         public bool IsValid(out List<string> validationErrors) 
         {
             validationErrors = new List<string>();
 
-            if (!Database.IsAlphanumeric())
-                validationErrors.Add("Database name must be alphanumeric");
+            //if (!Database.IsAlphanumeric())
+            //    validationErrors.Add("Database name must be alphanumeric");
 
             if (!CounterTable.IsAlphanumeric())
                 validationErrors.Add("Counter table must be alphanumeric");

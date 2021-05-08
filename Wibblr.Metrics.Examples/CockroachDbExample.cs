@@ -1,4 +1,6 @@
-﻿using Wibblr.Metrics.CockroachDb;
+﻿using System.IO;
+using System.Text.Json;
+using Wibblr.Metrics.CockroachDb;
 
 namespace Wibblr.Metrics.Examples
 {
@@ -6,20 +8,16 @@ namespace Wibblr.Metrics.Examples
     {
         static void Main(string[] args)
         {
-            var sink = new CockroachDbSinkBuilder
-            {
-                Host = "192.168.0.7",
-                Port = 26261,
-                Username = "root",
-                Password = "",
-                Database = "test",
-                CounterTable = "MetricsCounter",
-                HistogramTable = "MetricsHistogram",
-                EventTable = "MetricsEvent",
-                ProfileTable = "MetricsProfile",
-                BatchSize = 1000,
-                MaxQueuedRows = 10000
-            }.Build();
+            var sinkBuilder = JsonSerializer.Deserialize<CockroachDbSinkBuilder>(File.ReadAllText("CockroachDb-connection.json"));
+
+            sinkBuilder.CounterTable = "MetricsCounter";
+            sinkBuilder.HistogramTable = "MetricsHistogram";
+            sinkBuilder.EventTable = "MetricsEvent";
+            sinkBuilder.ProfileTable = "MetricsProfile";
+            sinkBuilder.BatchSize = 1000;
+            sinkBuilder.MaxQueuedRows = 10000;
+
+            var sink = sinkBuilder.Build();
 
             sink.EnsureTablesExist();
 

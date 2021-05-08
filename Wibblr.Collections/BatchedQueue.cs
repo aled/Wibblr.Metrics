@@ -25,8 +25,9 @@ namespace Wibblr.Collections
             batchList.AddLast(new List<T>());
         }
 
-        // Add item to back of queue. If already full, this item is
-        // discarded.
+        // Enqueue a single item to the back of the queue. If the queue is already full, this item is
+        // discarded. Otherwise it is added to the last batch; or a new batch is created if the last
+        // batch is full.
         public bool Enqueue(T item)
         {
             if (count < maxCapacity)
@@ -41,6 +42,7 @@ namespace Wibblr.Collections
             return false;
         }
 
+        // Enqueue a number of items to the back of the queue. 
         public int Enqueue(IEnumerable<T> items)
         {
             var numItemsAdded = 0;
@@ -55,7 +57,7 @@ namespace Wibblr.Collections
         }
 
         // Add batch to front of queue. If already full, items from the 
-        // back of the queue are discarded.
+        // back of the queue are discarded. The batch may exceed the batch size.
         public void EnqueueToFront(List<T> batch)
         {
             batchList.AddFirst(batch);

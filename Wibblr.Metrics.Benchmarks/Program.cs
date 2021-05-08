@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Linq;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Attributes.Jobs;
+using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using Wibblr.Metrics.Core;
 
@@ -15,7 +15,7 @@ namespace Wibblr.Metrics.Benchmarks
         }
     }
 
-    [CoreJob]
+    [SimpleJob(RuntimeMoniker.NetCoreApp50)]
     public class CountingBenchmark
     {
         MetricsCollector metrics;

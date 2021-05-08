@@ -17,7 +17,6 @@ namespace Wibblr.Metrics.Core.Tests
 
             var metrics = new MetricsCollector(sink, clock, windowSize, flushInterval, false);
 
-          
             using (metrics.Profile("session1", "block1"))
             {
                 Thread.Sleep(20);

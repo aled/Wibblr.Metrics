@@ -8,7 +8,6 @@ namespace Wibblr.Collections.Tests
 {
     public static class ExtentionsTestsExtenstions
     {
-        
         public static List<int> WithDroppedLast(this List<int> items, int n)
         {
             items.DropLast(n);

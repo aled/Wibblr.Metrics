@@ -16,7 +16,7 @@ namespace Wibblr.Metrics.Core.Tests
 
             e.IncrementCounter("myCounter");
             e.Dispose();
-            Assert.Equal(1, sink.Counters.Count);
+            Assert.Single(sink.Counters);
 
             e.IncrementCounter("myCounter");
         }

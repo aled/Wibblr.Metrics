@@ -16,6 +16,8 @@ namespace Wibblr.Metrics.CockroachDb
         private Table eventTable;
         private Table profileTable;
 
+        private string Quote(string s) => "\"" + s.Replace("\"", "\\\"") + "\"";
+
         public CockroachDbSink(IDatabaseConfig config)
         {
             if (!config.IsValid(out var validationErrors))
@@ -87,20 +89,20 @@ namespace Wibblr.Metrics.CockroachDb
                 {
                     cmd.Connection = con;
                     cmd.CommandType = CommandType.Text;
-                    cmd.CommandText = $"CREATE DATABASE IF NOT EXISTS {config.Database};";
+                    cmd.CommandText = $"CREATE DATABASE IF NOT EXISTS {Quote(config.Database)};";
 
                     cmd.ExecuteNonQuery();
 
-                    cmd.CommandText = counterTable.CreateTableSql(config.Database);
+                    cmd.CommandText = counterTable.CreateTableSql(Quote(config.Database));
                     cmd.ExecuteNonQuery();
 
-                    cmd.CommandText = histogramTable.CreateTableSql(config.Database);
+                    cmd.CommandText = histogramTable.CreateTableSql(Quote(config.Database));
                     cmd.ExecuteNonQuery();
 
-                    cmd.CommandText = eventTable.CreateTableSql(config.Database);
+                    cmd.CommandText = eventTable.CreateTableSql(Quote(config.Database));
                     cmd.ExecuteNonQuery();
 
-                    cmd.CommandText = profileTable.CreateTableSql(config.Database);
+                    cmd.CommandText = profileTable.CreateTableSql(Quote(config.Database));
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -109,7 +111,7 @@ namespace Wibblr.Metrics.CockroachDb
         public void Flush(IEnumerable<WindowedCounter> counters)
         {
             counterTable.Insert(
-                config.Database,
+                Quote(config.Database),
                 config.ConnectionString,
                 counters.Select(b => new object[] {
                     b.name,
@@ -121,7 +123,7 @@ namespace Wibblr.Metrics.CockroachDb
         public void Flush(IEnumerable<WindowedBucket> buckets)
         {
             histogramTable.Insert(
-                config.Database,
+                Quote(config.Database),
                 config.ConnectionString,
                 buckets.Select(b => new object[] {
                     b.name,
@@ -135,7 +137,7 @@ namespace Wibblr.Metrics.CockroachDb
         public void Flush(IEnumerable<TimestampedEvent> events)
         {
             eventTable.Insert(
-                config.Database, 
+                Quote(config.Database), 
                 config.ConnectionString, 
                 events.Select(e => new object[] { 
                     e.name, 
@@ -145,7 +147,7 @@ namespace Wibblr.Metrics.CockroachDb
         public void Flush(IEnumerable<Profile> profiles)
         {
             profileTable.Insert(
-                config.Database,
+                Quote(config.Database),
                 config.ConnectionString,
                 profiles.Select(p => new object[] {
                         p.sessionId,
