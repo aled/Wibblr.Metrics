@@ -1,6 +1,9 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
+
+using Wibblr.Metrics.Plugins.Interfaces;
 
 namespace Wibblr.Metrics.Core
 {
@@ -74,6 +77,12 @@ namespace Wibblr.Metrics.Core
         public MetricsCollector(IMetricsSink sink, TimeSpan windowSize, TimeSpan flushInterval, bool ignoreEmptyBuckets = false)
             : this(sink, new Clock(), windowSize, flushInterval, ignoreEmptyBuckets) { }
 
+        public MetricsCollector(IMetricsSink sink, MetricsCollectorSettings settings)
+            : this(sink,
+                   TimeSpan.ParseExact(settings.WindowSize, "h\\:mm\\:ss", CultureInfo.InvariantCulture),
+                   TimeSpan.ParseExact(settings.FlushInterval, "h\\:mm\\:ss", CultureInfo.InvariantCulture),
+                   settings.IgnoreEmptyBuckets) { }
+
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Wibblr.Metrics.Core.CounterCollector"/> class.
         /// with default values (window size and flush interval are 1 minute)
@@ -95,7 +104,8 @@ namespace Wibblr.Metrics.Core
 
             try
             {
-                var key = new Metric(name, new Window(clock.Current, windowSize));
+                var windowStart = clock.Current.RoundDown(windowSize);
+                var key = new Metric(name, windowStart, windowStart + windowSize);
 
                 lock (countersLock)
                 {
@@ -125,7 +135,8 @@ namespace Wibblr.Metrics.Core
 
             try
             {
-                var key = new Metric(name, new Window(clock.Current, windowSize));
+                var windowStart = clock.Current.RoundDown(windowSize);
+                var key = new Metric(name, windowStart, windowStart + windowSize);
 
                 // Default thresholds - useful for measuring web page latencies in milliseconds
                 if (!thresholdDict.TryGetValue(name, out var thresholds))
@@ -240,12 +251,13 @@ namespace Wibblr.Metrics.Core
                         // Only take counts before the current timeperiod (unless 
                         // the delayedAction is cancelled, i.e. there will be no more flushes),
                         // so that each counter is only written once for each window.
-                        if (isFlushCancelled || c.window.start < currentTimePeriodStart)
+                        if (isFlushCancelled || c.from < currentTimePeriodStart)
                         {
                             tempCounters.Add(new WindowedCounter
                             {
                                 name = c.name,
-                                window = c.window,
+                                from = c.from,
+                                to = c.to,
                                 count = counters[c]
                             });
                             counters.Remove(c);
@@ -262,7 +274,7 @@ namespace Wibblr.Metrics.Core
                 {
                     foreach (var h in histograms.Keys.ToList())
                     {
-                        if (isFlushCancelled || h.window.start < currentTimePeriodStart)
+                        if (isFlushCancelled || h.from < currentTimePeriodStart)
                         {
                             foreach (var bucket in histograms[h].Buckets())
                             {
@@ -272,9 +284,10 @@ namespace Wibblr.Metrics.Core
                                 tempBuckets.Add(new WindowedBucket
                                 {
                                     name = h.name,
-                                    window = h.window,
-                                    from = bucket.from,
-                                    to = bucket.to,
+                                    timeFrom = h.from,
+                                    timeTo = h.to,
+                                    valueFrom = bucket.from,
+                                    valueTo = bucket.to,
                                     count = bucket.count
                                 });
                             }
@@ -311,6 +324,15 @@ namespace Wibblr.Metrics.Core
 
                 if (tempProfiles != null)
                     sink.Flush(tempProfiles);
+            }
+            catch (Exception e)
+            {
+                Console.Error.Write(e.Message);
+            }
+
+            try
+            {
+                sink.FlushComplete();
             }
             catch (Exception e)
             {

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using Wibblr.Collections;
+using Wibblr.Metrics.Plugins.Interfaces;
 
 namespace Wibblr.Metrics.Core
 {
@@ -12,55 +13,72 @@ namespace Wibblr.Metrics.Core
     /// </summary>
     public class FileSink : IMetricsSink
     {
-        private IMetricsSerializer serializer;
-        private IFileNamingStrategy fileNamingStrategy;
+        private IFileNamingStrategy _fileNamingStrategy;
+        private IMetricsSerializer _serializer;
 
         public FileSink(IMetricsSerializer serializer, IFileNamingStrategy fileNamingStrategy)
         {
-            this.serializer = serializer;
-            this.fileNamingStrategy = fileNamingStrategy;
+            _serializer = serializer;
+            _fileNamingStrategy = fileNamingStrategy;
         }
 
         public void Flush(IEnumerable<WindowedCounter> counters)
         {
-            foreach (var partition in counters.Partition((a, b) => !fileNamingStrategy.EqualNames(a, b)))
+            if (counters.Any())
             {
-                var fileName = fileNamingStrategy.BaseName(partition.First()) + "." + serializer.FileExtension;
-                using (var w = CreateOrOpen(fileName, writer => serializer.WriteCounterHeader(writer)))
-                    serializer.Write(partition, w);
+                foreach (var partition in counters.Partition((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
+                {
+                    var fileName = _fileNamingStrategy.BaseName(partition.First()) + "." + _serializer.FileExtension;
+                    using (var w = CreateOrOpen(fileName, writer => _serializer.WriteCounterHeader(writer)))
+                        _serializer.Write(partition, w);
+                }
             }
         }
 
         public void Flush(IEnumerable<WindowedBucket> buckets)
         {
-            foreach (var partition in buckets.Partition((a, b) => !fileNamingStrategy.EqualNames(a, b)))
+            if (buckets.Any())
             {
-                var fileName = fileNamingStrategy.BaseName(partition.First()) + "." + serializer.FileExtension;
-                using (var w = CreateOrOpen(fileName, writer => serializer.WriteBucketHeader(writer)))
-                    serializer.Write(partition, w);
+                foreach (var partition in buckets.Partition((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
+                {
+                    var fileName = _fileNamingStrategy.BaseName(partition.First()) + "." + _serializer.FileExtension;
+                    using (var w = CreateOrOpen(fileName, writer => _serializer.WriteBucketHeader(writer)))
+                        _serializer.Write(partition, w);
+                }
             }
         }
 
         public void Flush(IEnumerable<TimestampedEvent> events)
         {
-            foreach (var partition in events.Partition((a, b) => !fileNamingStrategy.EqualNames(a, b)))
+            if (events.Any())
             {
-                var fileName = fileNamingStrategy.BaseName(partition.First()) + "." + serializer.FileExtension;
-                using (var w = CreateOrOpen(fileName, writer => serializer.WriteEventHeader(writer)))
-                    serializer.Write(partition, w);
+                foreach (var partition in events.Partition((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
+                {
+                    var fileName = _fileNamingStrategy.BaseName(partition.First()) + "." + _serializer.FileExtension;
+                    using (var w = CreateOrOpen(fileName, writer => _serializer.WriteEventHeader(writer)))
+                        _serializer.Write(partition, w);
+                }
             }
         }
 
         public void Flush(IEnumerable<Profile> profiles)
         {
-            foreach (var partition in profiles.Partition((a, b) => !fileNamingStrategy.EqualNames(a, b)))
+            if (profiles.Any())
             {
-                var fileName = fileNamingStrategy.BaseName(partition.First()) + "." + serializer.FileExtension;
-                using (var w = CreateOrOpen(fileName, writer => serializer.WriteProfileHeader(writer)))
+                foreach (var partition in profiles.Partition((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
                 {
-                    serializer.Write(partition, w);
+                    var fileName = _fileNamingStrategy.BaseName(partition.First()) + "." + _serializer.FileExtension;
+                    using (var w = CreateOrOpen(fileName, writer => _serializer.WriteProfileHeader(writer)))
+                    {
+                        _serializer.Write(partition, w);
+                    }
                 }
             }
+        }
+
+        public void FlushComplete()
+        {
+            // no op
         }
 
         /// <summary>

@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 
+using Wibblr.Metrics.Plugins.Interfaces;
+
 namespace Wibblr.Metrics.Core.Tests
 {
     public class DictionarySink : IMetricsSink
@@ -16,7 +18,7 @@ namespace Wibblr.Metrics.Core.Tests
         {
             foreach (var c in counters)
             {
-                var key = new Metric(c.name, c.window);
+                var key = new Metric(c.name, c.from, c.to);
                 if (Counters.ContainsKey(key))
                     Counters[key] = Counters[key] + c.count;
                 else
@@ -28,8 +30,8 @@ namespace Wibblr.Metrics.Core.Tests
         {
             foreach (var wb in windowedBuckets)
             {
-                var metric = new Metric(wb.name, wb.window);
-                var bucketKey = (wb.from ?? int.MinValue, wb.to ?? int.MaxValue);
+                var metric = new Metric(wb.name, wb.timeFrom, wb.timeTo);
+                var bucketKey = (wb.valueFrom ?? int.MinValue, wb.valueTo ?? int.MaxValue);
 
                 if (Buckets.TryGetValue(metric, out Dictionary<(int, int), long> histogram))
                 {
@@ -51,6 +53,11 @@ namespace Wibblr.Metrics.Core.Tests
         }
 
         public void Flush(IEnumerable<Profile> profiles)
+        {
+            throw new NotImplementedException();
+        }
+
+        public void FlushComplete()
         {
             throw new NotImplementedException();
         }

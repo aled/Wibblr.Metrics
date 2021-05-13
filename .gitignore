@@ -39,5 +39,8 @@ Thumbs.db
 
 # dotCover
 *.dotCover
+
 /Wibblr.Metrics.Examples/CockroachDb-certificate-authority.crt
-/Wibblr.Metrics.Examples/CockroachDb-connection.json
+/Wibblr.Metrics.Examples/appsettings.cockroachdb.json
+/Wibblr.Metrics.RestApi/CockroachDb-certificate-authority.crt
+/Wibblr.Metrics.RestApi/appsettings.Development.json

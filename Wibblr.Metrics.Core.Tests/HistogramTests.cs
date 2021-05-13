@@ -18,20 +18,23 @@ namespace Wibblr.Metrics.Core.Tests
             metrics.RegisterThresholds("h", new[] { 0, 10, 20 });
             metrics.RegisterThresholds("g", new[] { 30, 40 });
 
-            var window1 = new Window(clock.Current, windowSize);
+            var window1From = clock.Current.RoundDown(windowSize);
+            var window1To = window1From + windowSize;
             metrics.IncrementBucket("h", 0);
             clock.Advance(windowSize);
-            sink.Buckets[new Metric("h", window1)][(0, 10)].Should().Be(1);
+            sink.Buckets[new Metric("h", window1From, window1From + windowSize)][(0, 10)].Should().Be(1);
 
-            var window2 = new Window(clock.Current, windowSize);
+            var window2From = clock.Current.RoundDown(windowSize);
+            var window2To = window2From + windowSize;
             metrics.IncrementBucket("h", 10);
             metrics.IncrementBucket("g", 29);
             clock.Advance(windowSize);
-            sink.Buckets[new Metric("h", window1)][(0, 10)].Should().Be(1);
-            sink.Buckets[new Metric("h", window2)][(10, 20)].Should().Be(1);
-            sink.Buckets[new Metric("g", window2)][(int.MinValue, 30)].Should().Be(1);
+            sink.Buckets[new Metric("h", window1From, window1To)][(0, 10)].Should().Be(1);
+            sink.Buckets[new Metric("h", window2From, window2To)][(10, 20)].Should().Be(1);
+            sink.Buckets[new Metric("g", window2From, window2To)][(int.MinValue, 30)].Should().Be(1);
 
-            var window3 = new Window(clock.Current, windowSize);
+            var window3From = clock.Current.RoundDown(windowSize);
+            var window3To = window3From + windowSize;
             metrics.IncrementBucket("h", 10);
             metrics.IncrementBucket("h", 11);
             metrics.IncrementBucket("h", 20);
@@ -40,10 +43,10 @@ namespace Wibblr.Metrics.Core.Tests
             metrics.IncrementBucket("g", 31);
             metrics.IncrementBucket("g", 40);
             clock.Advance(windowSize);
-            sink.Buckets[new Metric("h", window3)][(10, 20)].Should().Be(2);
-            sink.Buckets[new Metric("h", window3)][(20, int.MaxValue)].Should().Be(2);
-            sink.Buckets[new Metric("g", window3)][(30, 40)].Should().Be(2);
-            sink.Buckets[new Metric("g", window3)][(40, int.MaxValue)].Should().Be(1);
+            sink.Buckets[new Metric("h", window3From, window3To)][(10, 20)].Should().Be(2);
+            sink.Buckets[new Metric("h", window3From, window3To)][(20, int.MaxValue)].Should().Be(2);
+            sink.Buckets[new Metric("g", window3From, window3To)][(30, 40)].Should().Be(2);
+            sink.Buckets[new Metric("g", window3From, window3To)][(40, int.MaxValue)].Should().Be(1);
         }
 
         [Fact]

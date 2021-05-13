@@ -1,14 +1,18 @@
+using System;
+
 namespace Wibblr.Metrics.Core
 {
     public struct Metric
     {
         public string name;
-        public Window window;
+        public DateTime from;
+        public DateTime to;
 
-        public Metric(string name, Window window)
+        public Metric(string name, DateTime from, DateTime to)
         {
             this.name = name;
-            this.window = window;
+            this.from = from;
+            this.to = to;
         }
     }
-} 
+}

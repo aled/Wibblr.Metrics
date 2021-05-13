@@ -4,6 +4,7 @@ using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
 using Wibblr.Metrics.Core;
+using Wibblr.Metrics.Plugins.Interfaces;
 
 namespace Wibblr.Metrics.Benchmarks
 {
@@ -30,7 +31,7 @@ namespace Wibblr.Metrics.Benchmarks
                               .Select(x => Guid.NewGuid().ToString())
                               .ToArray();
 
-            sink = new TextWriterSink(Console.Out);
+            sink = new TextWriterSink(Console.Out, new LineSerializer());
             metrics = new MetricsCollector(sink, TimeSpan.FromSeconds(1), TimeSpan.FromSeconds(1));
 
             foreach (var name in names)

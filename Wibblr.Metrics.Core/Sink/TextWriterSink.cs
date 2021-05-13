@@ -1,93 +1,65 @@
 ﻿using System;
-using System.Linq;
 using System.Collections.Generic;
 using System.IO;
+using System.Linq;
+
+using Wibblr.Metrics.Plugins.Interfaces;
 
 namespace Wibblr.Metrics.Core
 {
+    /// <summary>
+    /// Writes metrics to a single textwriter (e.g. console)
+    /// </summary>
     public class TextWriterSink : IMetricsSink
     {
-        private TextWriter writer;
+        private TextWriter _writer;
+        private IMetricsSerializer _serializer;
 
-        public TextWriterSink(TextWriter writer)
+        public TextWriterSink(TextWriter writer, IMetricsSerializer serializer)
         {
-            this.writer = writer;
+            _writer = writer;
+            _serializer = serializer;
         }
 
-        private string Printable(string s) =>
-            new String(s.SelectMany(c => Char.IsControl(c) ? ("0x" + ((int)c).ToString("X4")).ToCharArray() : new char[] { c }).ToArray());
-
-        public void Flush(IEnumerable<WindowedCounter> events)
+        public void Flush(IEnumerable<WindowedCounter> counters)
         {
-            var lines = events
-                .OrderBy(x => x.window.start)
-                .ThenBy(x => x.name)
-                .Select(x => $"C {x.window.start.ToString("mm:ss.fff")} - {x.window.end.ToString("mm:ss.fff")} {Printable(x.name)} {x.count}");
-
-            if (lines.Any())
+            if (counters.Any())
             {
-                foreach (var line in lines)
-                    writer.WriteLine(line);
-
-                writer.WriteLine("-");
-
-                writer.Flush();
+                _serializer.WriteCounterHeader(_writer);
+                _serializer.Write(counters, _writer);
             }
         }
 
         public void Flush(IEnumerable<WindowedBucket> buckets)
         {
-            var lines = buckets
-                .OrderBy(x => x.window.start)
-                .ThenBy(x => x.name)
-                .ThenBy(x => x.from)
-                .Select(x => $"H {x.window.start.ToString("mm:ss.fff")} - {x.window.end.ToString("mm:ss.fff")} {Printable(x.name)} {x.from}-{x.to} {x.count}");
-
-            if (lines.Any())
+            if (buckets.Any())
             {
-                foreach (var line in lines)
-                    writer.WriteLine(line);
-
-                writer.WriteLine("--");
-
-                writer.Flush();
+                _serializer.WriteBucketHeader(_writer);
+                _serializer.Write(buckets, _writer);
             }
         }
 
         public void Flush(IEnumerable<TimestampedEvent> events)
         {
-            var lines = events
-                .OrderBy(x => x.timestamp)
-                .ThenBy(x => x.name)
-                .Select(x => $"E {x.timestamp.ToString("mm:ss.fff")} {Printable(x.name)}");
-
-            if (lines.Any())
+            if (events.Any())
             {
-                foreach (var line in lines)
-                    writer.WriteLine(line);
-
-                writer.WriteLine("---");
-
-                writer.Flush();
+                _serializer.WriteEventHeader(_writer);
+                _serializer.Write(events, _writer);
             }
         }
 
         public void Flush(IEnumerable<Profile> profiles)
         {
-            var lines = new List<string>();
-
-            foreach (var p in profiles)
-                lines.Add($"P {Printable(p.name)} {p.phase} {p.timestamp.ToString("mm:ss.fff")}");
-
-            if (lines.Any())
+            if (profiles.Any())
             {
-                foreach (var line in lines)
-                    writer.WriteLine(line);
-
-                writer.WriteLine("----");
-
-                writer.Flush();
+                _serializer.WriteProfileHeader(_writer);
+                _serializer.Write(profiles, _writer);
             }
+        }
+
+        public void FlushComplete()
+        {
+            // no op
         }
     }
 }

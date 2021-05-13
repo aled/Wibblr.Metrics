@@ -8,9 +8,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.Core.Tests",
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.Examples", "Wibblr.Metrics.Examples\Wibblr.Metrics.Examples.csproj", "{02442FA6-D5F7-4222-9E23-84546AD9152F}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.SqlServer", "Wibblr.Metrics.SqlServer\Wibblr.Metrics.SqlServer.csproj", "{D41D0B2C-CEA1-4E35-9E90-3FC74334C6D1}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.Plugins.SqlServer", "Wibblr.Metrics.Plugins.SqlServer\Wibblr.Metrics.Plugins.SqlServer.csproj", "{D41D0B2C-CEA1-4E35-9E90-3FC74334C6D1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.CockroachDb", "Wibblr.Metrics.CockroachDb\Wibblr.Metrics.CockroachDb.csproj", "{E52DE0E0-1F35-4674-ACE2-5822CDEE221D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.Plugins.CockroachDb", "Wibblr.Metrics.Plugins.CockroachDb\Wibblr.Metrics.Plugins.CockroachDb.csproj", "{E52DE0E0-1F35-4674-ACE2-5822CDEE221D}"
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Collections", "Wibblr.Collections\Wibblr.Collections.csproj", "{33E57254-5B1D-4952-AB2E-EC75AFEF1D5F}"
 EndProject
@@ -22,6 +22,12 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		appveyor.yml = appveyor.yml
 	EndProjectSection
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.RestApi", "Wibblr.Metrics.RestApi\Wibblr.Metrics.RestApi.csproj", "{A55D8E37-00B5-4F72-A07B-58EBB24965D6}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.Plugins.Interfaces", "Wibblr.Metrics.Plugins.Interfaces\Wibblr.Metrics.Plugins.Interfaces.csproj", "{C803255D-3D98-4F19-872D-3AD497B658DC}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.RestApiModels", "RestApiModels\Wibblr.Metrics.RestApiModels.csproj", "{83A84C75-1E1E-46A5-876F-D04ECAC1B69F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -61,6 +67,18 @@ Global
 		{C724CC1D-A9EE-4D12-B0DD-F1FA38E3FC38}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C724CC1D-A9EE-4D12-B0DD-F1FA38E3FC38}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C724CC1D-A9EE-4D12-B0DD-F1FA38E3FC38}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A55D8E37-00B5-4F72-A07B-58EBB24965D6}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A55D8E37-00B5-4F72-A07B-58EBB24965D6}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A55D8E37-00B5-4F72-A07B-58EBB24965D6}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A55D8E37-00B5-4F72-A07B-58EBB24965D6}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C803255D-3D98-4F19-872D-3AD497B658DC}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C803255D-3D98-4F19-872D-3AD497B658DC}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C803255D-3D98-4F19-872D-3AD497B658DC}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C803255D-3D98-4F19-872D-3AD497B658DC}.Release|Any CPU.Build.0 = Release|Any CPU
+		{83A84C75-1E1E-46A5-876F-D04ECAC1B69F}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{83A84C75-1E1E-46A5-876F-D04ECAC1B69F}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{83A84C75-1E1E-46A5-876F-D04ECAC1B69F}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{83A84C75-1E1E-46A5-876F-D04ECAC1B69F}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
