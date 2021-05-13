@@ -14,8 +14,11 @@ build:
 after_build:
 - cmd: dotnet pack Wibblr.Collections\Wibblr.Collections.csproj
 - cmd: dotnet pack Wibblr.Metrics.Core\Wibblr.Metrics.Core.csproj
-- cmd: dotnet pack Wibblr.Metrics.CockroachDb\Wibblr.Metrics.CockroachDb.csproj
-- cmd: dotnet pack Wibblr.Metrics.SqlServer\Wibblr.Metrics.SqlServer.csproj
+- cmd: dotnet pack Wibblr.Metrics.Plugins.Interfaces\Wibblr.Metrics.Plugins.Interfaces.csproj
+- cmd: dotnet pack Wibblr.Metrics.Plugins.CockroachDb\Wibblr.Metrics.Plugins.CockroachDb.csproj
+- cmd: dotnet pack Wibblr.Metrics.Plugins.SqlServer\Wibblr.Metrics.Plugins.SqlServer.csproj
+- cmd: dotnet pack Wibblr.Metrics.RestApi\Wibblr.Metrics.RestApi.csproj
+- cmd: dotnet pack Wibblr.Metrics.RestApiModels\Wibblr.Metrics.RestApiModels.csproj
 artifacts:
 - path: '**\*.nupkg'
 deploy:
