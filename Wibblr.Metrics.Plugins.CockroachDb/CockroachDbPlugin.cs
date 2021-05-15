@@ -18,9 +18,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
         private Table histogramTable;
         private Table eventTable;
         private Table profileTable;
-
-        private string Quote(string s) => "\"" + s.Replace("\"", "\\\"") + "\"";
-
+       
         public string Name => "CockroachDb";
 
         public string Version => AssemblyName.GetAssemblyName(Assembly.GetExecutingAssembly().Location).Version.ToString();
@@ -40,7 +38,9 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                 RootCertificate = connectionSettings.CaCertFile
             }.ConnectionString;
 
-            counterTable = new Table(writerSettings)
+            var databaseName = _connectionSettings.Database;
+
+            counterTable = new Table(_connectionString, databaseName, writerSettings)
             {
                 Name = tables.Counter,
                 Columns = new List<Column> {
@@ -53,7 +53,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                 PrimaryKey = "Id",
             };
 
-            histogramTable = new Table(writerSettings)
+            histogramTable = new Table(_connectionString, databaseName, writerSettings)
             {
                 Name = tables.Histogram,
                 Columns = new List<Column> {
@@ -68,7 +68,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                 PrimaryKey = "Id",
             };
 
-            eventTable = new Table(writerSettings)
+            eventTable = new Table(_connectionString, databaseName, writerSettings)
             {
                 Name = tables.Event,
                 Columns = new List<Column> {
@@ -79,7 +79,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                 PrimaryKey = "Id",       
             };
 
-            profileTable = new Table(writerSettings)
+            profileTable = new Table(_connectionString, databaseName, writerSettings)
             {
                 Name = tables.Profile,
                 Columns = new List<Column> {
@@ -94,10 +94,14 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                 PrimaryKey = "Id",
             };
 
-            EnsureTablesExist();
+            EnsureDatabaseExists();
+            counterTable.EnsureExists();
+            histogramTable.EnsureExists();
+            eventTable.EnsureExists();
+            profileTable.EnsureExists();
         }
 
-        public void EnsureTablesExist()
+        private void EnsureDatabaseExists()
         {
             using (var con = new NpgsqlConnection(_connectionString))
             {
@@ -107,19 +111,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                     cmd.Connection = con;
                     cmd.CommandType = CommandType.Text;
 
-                    cmd.CommandText = $"CREATE DATABASE IF NOT EXISTS {Quote(_connectionSettings.Database)};";
-                    cmd.ExecuteNonQuery();
-
-                    cmd.CommandText = counterTable.CreateTableSql(Quote(_connectionSettings.Database));
-                    cmd.ExecuteNonQuery();
-
-                    cmd.CommandText = histogramTable.CreateTableSql(Quote(_connectionSettings.Database));
-                    cmd.ExecuteNonQuery();
-
-                    cmd.CommandText = eventTable.CreateTableSql(Quote(_connectionSettings.Database));
-                    cmd.ExecuteNonQuery();
-
-                    cmd.CommandText = profileTable.CreateTableSql(Quote(_connectionSettings.Database));
+                    cmd.CommandText = $"CREATE DATABASE IF NOT EXISTS {_connectionSettings.Database.SqlQuote()};";
                     cmd.ExecuteNonQuery();
                 }
             }
@@ -128,8 +120,6 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
         public void Flush(IEnumerable<WindowedCounter> counters)
         {
             counterTable.Insert(
-                Quote(_connectionSettings.Database),
-                _connectionString,
                 counters.Select(b => new object[] {
                     b.name,
                     b.from,
@@ -140,8 +130,6 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
         public void Flush(IEnumerable<WindowedBucket> buckets)
         {
             histogramTable.Insert(
-                Quote(_connectionSettings.Database),
-                _connectionString,
                 buckets.Select(b => new object[] {
                     b.name,
                     b.timeFrom,
@@ -154,8 +142,6 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
         public void Flush(IEnumerable<TimestampedEvent> events)
         {
             eventTable.Insert(
-                Quote(_connectionSettings.Database), 
-                _connectionString, 
                 events.Select(e => new object[] { 
                     e.name, 
                     e.timestamp }));
@@ -164,8 +150,6 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
         public void Flush(IEnumerable<Profile> profiles)
         {
             profileTable.Insert(
-                Quote(_connectionSettings.Database),
-                _connectionString,
                 profiles.Select(p => new object[] {
                         p.sessionId,
                         p.name,
@@ -189,6 +173,11 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
         public void FlushComplete()
         {
             // no op
+        }
+
+        public IEnumerable<WindowedCounter> GetAggregatedCounters(IList<string> names, DateTime from, DateTime to, TimeSpan groupBy)
+        {
+            return counterTable.Aggregate(names, from, to, groupBy);
         }
     }
 }

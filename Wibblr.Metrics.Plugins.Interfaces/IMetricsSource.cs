@@ -8,6 +8,6 @@ namespace Wibblr.Metrics.Plugins.Interfaces
     {
         IEnumerable<string> GetCounterNames(DateTime start, DateTime end);
 
-       // IEnumerable<AggregatedCounter> GetAggregatedCounter(string name, DateTime start, DateTime end, TimeSpan aggregationTime, bool includeZeroValues, string prefix = "");
+        IEnumerable<WindowedCounter> GetAggregatedCounters(IList<string> names, DateTime from, DateTime to, TimeSpan groupBy);
     }
 }

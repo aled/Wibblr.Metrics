@@ -230,5 +230,10 @@ namespace Wibblr.Metrics.Plugins.SqlServer
         {
             // no op
         }
+
+        public IEnumerable<WindowedCounter> GetAggregatedCounters(IList<string> names, DateTime from, DateTime to, TimeSpan groupBy)
+        {
+            throw new NotImplementedException();
+        }
     }
 }

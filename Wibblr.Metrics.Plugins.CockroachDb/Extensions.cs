@@ -46,5 +46,8 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
 
         public static string Join(this IEnumerable<string> items, string separator = ", ") =>
             string.Join(separator, items);
+
+        public static string SqlQuote(this string s) => 
+            "\"" + s.Replace("\"", "\\\"") + "\"";
     }
 }

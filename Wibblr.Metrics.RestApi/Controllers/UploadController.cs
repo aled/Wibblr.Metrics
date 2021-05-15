@@ -11,13 +11,13 @@ using Wibblr.Metrics.RestApiModels;
 namespace Wibblr.Metrics.RestApi.Controllers
 {
     [ApiController]
-    [Route("[controller]")]
-    public class MetricsController : ControllerBase
+    [Route("api/[controller]")]
+    public class UploadController : ControllerBase
     {
-        private readonly ILogger<MetricsController> _logger;
+        private readonly ILogger<UploadController> _logger;
         private readonly IDatabasePlugin _database;
 
-        public MetricsController(IDatabasePlugin database, ILogger<MetricsController> logger)
+        public UploadController(IDatabasePlugin database, ILogger<UploadController> logger)
         {
             _database = database;
             _logger = logger;
@@ -41,11 +41,12 @@ namespace Wibblr.Metrics.RestApi.Controllers
         }
 
         [HttpPost]
-        public ActionResult Counter(MetricsModel metrics)
+        [Route("Counter")]
+        public ActionResult Counter(IList<CounterModel> counters)
         {
-            if (metrics.Counters != null)
+            if (counters != null)
             {
-                var validatedCounters = metrics.Counters
+                var validatedCounters = counters
                     .Select(c => Validate(c));
 
                 _database.Flush(validatedCounters
@@ -61,12 +62,6 @@ namespace Wibblr.Metrics.RestApi.Controllers
                 return new JsonResult(validatedCounters.Select(c => new { c.success, c.message }));
             }
             return new OkResult();
-        }
-
-        [HttpGet]
-        public IEnumerable<WindowedCounter> Counter(string name, DateTimeOffset from, DateTimeOffset to)
-        {
-            return new WindowedCounter[] { };
         }
     }
 }
