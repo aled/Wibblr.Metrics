@@ -15,7 +15,6 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\RestApiModels\Wibblr.Metrics.RestApiModels.csproj" />
     <ProjectReference Include="..\Wibblr.Metrics.Core\Wibblr.Metrics.Core.csproj" />
     <ProjectReference Include="..\Wibblr.Metrics.Plugins.CockroachDb\Wibblr.Metrics.Plugins.CockroachDb.csproj" />
     <ProjectReference Include="..\Wibblr.Metrics.Plugins.SqlServer\Wibblr.Metrics.Plugins.SqlServer.csproj" />

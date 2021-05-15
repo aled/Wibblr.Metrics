@@ -27,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.RestApi", "W
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.Plugins.Interfaces", "Wibblr.Metrics.Plugins.Interfaces\Wibblr.Metrics.Plugins.Interfaces.csproj", "{C803255D-3D98-4F19-872D-3AD497B658DC}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.RestApiModels", "RestApiModels\Wibblr.Metrics.RestApiModels.csproj", "{83A84C75-1E1E-46A5-876F-D04ECAC1B69F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.RestApiModels", "Wibblr.Metrics.RestApiModels\Wibblr.Metrics.RestApiModels.csproj", "{83A84C75-1E1E-46A5-876F-D04ECAC1B69F}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

@@ -18,8 +18,8 @@
     <PackageReference Include="System.Runtime.Loader" Version="4.3.0" />
   </ItemGroup>
   <ItemGroup>
-    <ProjectReference Include="..\RestApiModels\Wibblr.Metrics.RestApiModels.csproj" />
     <ProjectReference Include="..\Wibblr.Collections\Wibblr.Collections.csproj" />
     <ProjectReference Include="..\Wibblr.Metrics.Plugins.Interfaces\Wibblr.Metrics.Plugins.Interfaces.csproj" />
+    <ProjectReference Include="..\Wibblr.Metrics.RestApiModels\Wibblr.Metrics.RestApiModels.csproj" />
   </ItemGroup>
 </Project>
