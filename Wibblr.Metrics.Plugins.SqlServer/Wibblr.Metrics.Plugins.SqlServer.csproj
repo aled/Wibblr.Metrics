@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
-    <Exec Command="xcopy /Y $(TargetPath) $(SolutionDir)Wibblr.Metrics.Examples\bin\$(ConfigurationName)\net5.0\&#xD;&#xA;xcopy /Y $(TargetPath) $(SolutionDir)Wibblr.Metrics.RestApi\bin\$(ConfigurationName)\net5.0\" />
+    <!--<Exec Command="xcopy /Y $(TargetPath) $(SolutionDir)Wibblr.Metrics.Examples\bin\$(ConfigurationName)\net5.0\&#xD;&#xA;xcopy /Y $(TargetPath) $(SolutionDir)Wibblr.Metrics.RestApi\bin\$(ConfigurationName)\net5.0\" />-->
   </Target>
 
 </Project>
