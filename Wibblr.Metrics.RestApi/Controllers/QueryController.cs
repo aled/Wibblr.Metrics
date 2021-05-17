@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 
 using Microsoft.AspNetCore.Mvc;
 
+using Wibblr.Collections;
 using Wibblr.Metrics.Core;
 using Wibblr.Metrics.Plugins.Interfaces;
 using Wibblr.Metrics.RestApiModels;
@@ -41,51 +42,14 @@ namespace Wibblr.Metrics.RestApi.Controllers
 
             var counterResponses = new List<CounterResponseModel>();
 
-            string expectedName = null;
-            DateTime expectedFrom = fromUtc;
-
-            foreach (var c in aggregatedCounters)
+            // partition by counter name
+            foreach (var partition in aggregatedCounters.Partition((a, b) => a.name != b.name))
             {
-                if (c.name != expectedName)
-                {
-                    // pad out the previous counter's values with zeros up to the end time
-                    if (counterResponses.Any())
-                    {
-                        while (expectedFrom < to.Subtract(groupBy))
-                        {
-                            expectedFrom = expectedFrom.Add(groupBy);
-                            counterResponses.Last().Values.Add(0);
-                        }
-                    }
+                counterResponses.Add(new CounterResponseModel { Name = partition.First().name, From = from, GroupBySeconds = groupBySeconds, Values = new List<long>() });
 
-                    counterResponses.Add(new CounterResponseModel { Name = c.name, From = from, GroupBySeconds = groupBySeconds, Values = new List<long>() });
-                    expectedFrom = fromUtc;
-                }
-
-                // pad out the current counter's values with zeros up to the next non-zero time
-                while (c.from > expectedFrom)
-                {
-                    expectedFrom = expectedFrom.Add(groupBy);
-                    counterResponses.Last().Values.Add(0);
-                }
-                counterResponses.Last().Values.Add(c.count);
-                expectedFrom = expectedFrom.Add(groupBy);
-            }
-
-            if (counterResponses.Any())
-            {
-                while (expectedFrom < to.Subtract(groupBy))
-                {
-                    expectedFrom = expectedFrom.Add(groupBy);
-                    counterResponses.Last().Values.Add(0);
-                }
-            }
-
-            // pad out the last counter's values with zeros up to the end time
-            while (expectedFrom < to.Subtract(groupBy))
-            {
-                expectedFrom = expectedFrom.Add(groupBy);
-                counterResponses.Last().Values.Add(0);
+                foreach (var c in partition)
+                    for (var expected = fromUtc; expected < toUtc; expected = expected + groupBy)
+                        counterResponses.Last().Values.Add(expected == c.from ? c.count : 0);
             }
 
             return new JsonResult(counterResponses);
