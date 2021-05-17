@@ -24,10 +24,8 @@ namespace Wibblr.Metrics.RestApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult Get(DateTimeOffset from, DateTimeOffset to, int groupBySeconds)
+        public ActionResult Get([FromQuery]string[] name, DateTimeOffset from, DateTimeOffset to, int groupBySeconds)
         {
-            var names = new[] { "%" };
-
             var groupBy = TimeSpan.FromSeconds(groupBySeconds);
 
             // must be a whole number of groupBySeconds per day.
@@ -38,7 +36,7 @@ namespace Wibblr.Metrics.RestApi.Controllers
             DateTime toUtc = to.UtcDateTime.RoundUp(groupBy);
 
             // Database must order by Name, From.
-            var aggregatedCounters = _database.GetAggregatedCounters(names, fromUtc, toUtc, groupBy);
+            var aggregatedCounters = _database.GetAggregatedCounters(name, fromUtc, toUtc, groupBy);
 
             var counterResponses = new List<CounterResponseModel>();
 
