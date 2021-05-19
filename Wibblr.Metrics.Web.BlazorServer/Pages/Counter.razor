@@ -1,15 +1,19 @@
 ﻿@page "/counter"
 @inject RestApiClient restApiClient
 
+@using System.Timers;
 @using Wibblr.Metrics.RestApiModels
 
 <h1>Counter</h1>
-<button class="btn-sm btn-primary" @onclick="@(async e => await AddBarData())">Refresh Now</button>
+
+<MatButton @onclick="@(async e => await RefreshData())">Refresh Now</MatButton>
+
+<MatSlideToggle TValue="bool" Label="Auto Refresh" ValueChanged="@(e => AutoRefreshChanged(e))"></MatSlideToggle>
 
 <PlotlyChart @bind-Config="barConfig" @bind-Layout="barLayout" @bind-Data="barData" @ref="barChart" />
 
 @code {
-    bool autoRefresh;
+    Timer timer = new Timer(500);
 
     PlotlyChart barChart;
     Config barConfig = new Config();
@@ -22,8 +26,37 @@
 
     IList<ITrace> barData = new List<ITrace>();
 
-    private async Task AddBarData()
+    private void AutoRefreshChanged(bool autoRefresh)
     {
+      timer.Enabled = autoRefresh;
+      timer.AutoReset = true;
+    }
+
+    protected override void OnInitialized()
+  {
+    timer.Elapsed += OnTimer;
+  }
+
+
+  private void OnTimer(object source, ElapsedEventArgs e)
+  {
+    InvokeAsync(async () => await RefreshData());
+  }
+
+  // There must be a better way to prevent multiple simultaneous timer events
+  bool isRefreshing = false;
+
+  private async Task RefreshData()
+  {
+    if (isRefreshing)
+    {
+      Console.WriteLine("IsRefreshing");
+      return;
+    }
+    try
+    {
+      isRefreshing = true;
+
       var counterResponse = await restApiClient.GetCountersAsync(new[] { "%" }, DateTimeOffset.Parse("2021-05-13T18:00"), DateTimeOffset.Parse("2021-05-14T00:00"), TimeSpan.FromSeconds(300));
 
       await barChart.Clear();
@@ -34,9 +67,14 @@
             new Bar
             {
               Name = c.Name,
-              X = Enumerable.Range(1, c.Values.Count).Select(x => (object) c.From.AddSeconds(x * c.GroupBySeconds)).ToList(),
-              Y = c.Values//.Select(x => (object) x).ToList()
+              X = Enumerable.Range(1, c.Values.Count).Select(x => (object)c.From.AddSeconds(x * c.GroupBySeconds)).ToList(),
+              Y = c.Values
             });
       }
     }
+    finally
+    {
+      isRefreshing = false;
+    }
+  }
 }

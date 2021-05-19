@@ -10,6 +10,7 @@ using Microsoft.AspNetCore.HttpsPolicy;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using MatBlazor;
 
 namespace Wibblr.Metrics.Web.BlazorServer
 {
@@ -28,6 +29,7 @@ namespace Wibblr.Metrics.Web.BlazorServer
         {
             services.AddRazorPages();
             services.AddServerSideBlazor();
+            services.AddMatBlazor();
             services.AddHttpClient<RestApiClient>(client =>
             {
                 client.BaseAddress = new Uri("https://localhost:5001");
