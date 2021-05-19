@@ -29,6 +29,8 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.Plugins.Inte
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Wibblr.Metrics.RestApiModels", "Wibblr.Metrics.RestApiModels\Wibblr.Metrics.RestApiModels.csproj", "{83A84C75-1E1E-46A5-876F-D04ECAC1B69F}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Wibblr.Metrics.Web.BlazorServer", "Wibblr.Metrics.Web.BlazorServer\Wibblr.Metrics.Web.BlazorServer.csproj", "{39D1181C-B7E4-413D-A4F3-D75385CFCF78}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -79,6 +81,10 @@ Global
 		{83A84C75-1E1E-46A5-876F-D04ECAC1B69F}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{83A84C75-1E1E-46A5-876F-D04ECAC1B69F}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{83A84C75-1E1E-46A5-876F-D04ECAC1B69F}.Release|Any CPU.Build.0 = Release|Any CPU
+		{39D1181C-B7E4-413D-A4F3-D75385CFCF78}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{39D1181C-B7E4-413D-A4F3-D75385CFCF78}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{39D1181C-B7E4-413D-A4F3-D75385CFCF78}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{39D1181C-B7E4-413D-A4F3-D75385CFCF78}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

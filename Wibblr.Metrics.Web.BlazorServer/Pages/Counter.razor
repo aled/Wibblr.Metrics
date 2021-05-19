@@ -1,0 +1,42 @@
+﻿@page "/counter"
+@inject RestApiClient restApiClient
+
+@using Wibblr.Metrics.RestApiModels
+
+<h1>Counter</h1>
+<button class="btn-sm btn-primary" @onclick="@(async e => await AddBarData())">Refresh Now</button>
+
+<PlotlyChart @bind-Config="barConfig" @bind-Layout="barLayout" @bind-Data="barData" @ref="barChart" />
+
+@code {
+    bool autoRefresh;
+
+    PlotlyChart barChart;
+    Config barConfig = new Config();
+
+    Layout barLayout = new Layout
+    {
+      BarMode = Plotly.Blazor.LayoutLib.BarModeEnum.Group,
+      Height = 500
+    };
+
+    IList<ITrace> barData = new List<ITrace>();
+
+    private async Task AddBarData()
+    {
+      var counterResponse = await restApiClient.GetCountersAsync(new[] { "%" }, DateTimeOffset.Parse("2021-05-13T18:00"), DateTimeOffset.Parse("2021-05-14T00:00"), TimeSpan.FromSeconds(300));
+
+      await barChart.Clear();
+
+      foreach (var c in counterResponse)
+      {
+        await barChart.AddTrace(
+            new Bar
+            {
+              Name = c.Name,
+              X = Enumerable.Range(1, c.Values.Count).Select(x => (object) c.From.AddSeconds(x * c.GroupBySeconds)).ToList(),
+              Y = c.Values//.Select(x => (object) x).ToList()
+            });
+      }
+    }
+}
