@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Threading.Tasks;
+using System.Text.Json;
 
 using Microsoft.AspNetCore.Mvc;
 
@@ -24,7 +24,8 @@ namespace Wibblr.Metrics.RestApi.Controllers
         }
 
         [HttpGet]
-        public ActionResult Get([FromQuery]string[] name, DateTimeOffset from, DateTimeOffset to, int groupBySeconds)
+        [Route("counter")]
+        public ActionResult Counter([FromQuery]string[] name, DateTimeOffset from, DateTimeOffset to, int groupBySeconds)
         {
             var groupBy = TimeSpan.FromSeconds(groupBySeconds);
 
@@ -43,7 +44,7 @@ namespace Wibblr.Metrics.RestApi.Controllers
             // partition by counter name
             foreach (var partition in aggregatedCounters.Partition((a, b) => a.name != b.name))
             {
-                counterResponses.Add(new CounterResponseModel { Name = partition.First().name, From = from, GroupBySeconds = groupBySeconds, Values = new List<long>() });
+                counterResponses.Add(new CounterResponseModel { Name = partition.First().name, From = from, GroupBySeconds = groupBySeconds, Values = new List<object>() });
 
                 foreach (var c in partition)
                     for (var expected = fromUtc; expected < toUtc; expected = expected + groupBy)

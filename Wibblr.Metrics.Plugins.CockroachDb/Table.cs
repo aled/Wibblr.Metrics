@@ -142,7 +142,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                 nameParametersClause +
                 "group by 1,2 " +
                 "order by 1,2 " +
-                "limit 1000;";
+                "limit 10000;";
 
             using (var con = new NpgsqlConnection(_connectionString))
             {

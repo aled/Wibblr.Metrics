@@ -9,6 +9,6 @@ namespace Wibblr.Metrics.RestApiModels
         public string Name { get; set; }
         public DateTimeOffset From { get; set; }
         public int GroupBySeconds { get; set; }
-        public IList<long> Values { get; set; }
+        public IList<object> Values { get; set; }
     }
 }
