@@ -13,9 +13,9 @@ namespace Wibblr.Metrics.Core
     public class TextWriterSink : IMetricsSink
     {
         private TextWriter _writer;
-        private IMetricsSerializer _serializer;
+        private MetricsTextSerializer _serializer;
 
-        public TextWriterSink(TextWriter writer, IMetricsSerializer serializer)
+        public TextWriterSink(TextWriter writer, MetricsTextSerializer serializer)
         {
             _writer = writer;
             _serializer = serializer;

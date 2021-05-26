@@ -14,9 +14,9 @@ namespace Wibblr.Metrics.Core
     public class FileSink : IMetricsSink
     {
         private IFileNamingStrategy _fileNamingStrategy;
-        private IMetricsSerializer _serializer;
+        private IMetricsStreamSerializer _serializer;
 
-        public FileSink(IMetricsSerializer serializer, IFileNamingStrategy fileNamingStrategy)
+        public FileSink(IMetricsStreamSerializer serializer, IFileNamingStrategy fileNamingStrategy)
         {
             _serializer = serializer;
             _fileNamingStrategy = fileNamingStrategy;
@@ -29,8 +29,8 @@ namespace Wibblr.Metrics.Core
                 foreach (var partition in counters.Partition((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
                 {
                     var fileName = _fileNamingStrategy.BaseName(partition.First()) + "." + _serializer.FileExtension;
-                    using (var w = CreateOrOpen(fileName, writer => _serializer.WriteCounterHeader(writer)))
-                        _serializer.Write(partition, w);
+                    using (var stream = CreateOrOpen(fileName, x => _serializer.WriteCounterHeader(x)))
+                        _serializer.Write(partition, stream);
                 }
             }
         }
@@ -42,8 +42,8 @@ namespace Wibblr.Metrics.Core
                 foreach (var partition in buckets.Partition((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
                 {
                     var fileName = _fileNamingStrategy.BaseName(partition.First()) + "." + _serializer.FileExtension;
-                    using (var w = CreateOrOpen(fileName, writer => _serializer.WriteBucketHeader(writer)))
-                        _serializer.Write(partition, w);
+                    using (var stream = CreateOrOpen(fileName, x => _serializer.WriteBucketHeader(x)))
+                        _serializer.Write(partition, stream);
                 }
             }
         }
@@ -55,8 +55,8 @@ namespace Wibblr.Metrics.Core
                 foreach (var partition in events.Partition((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
                 {
                     var fileName = _fileNamingStrategy.BaseName(partition.First()) + "." + _serializer.FileExtension;
-                    using (var w = CreateOrOpen(fileName, writer => _serializer.WriteEventHeader(writer)))
-                        _serializer.Write(partition, w);
+                    using (var stream = CreateOrOpen(fileName, x => _serializer.WriteEventHeader(x)))
+                        _serializer.Write(partition, stream);
                 }
             }
         }
@@ -68,9 +68,9 @@ namespace Wibblr.Metrics.Core
                 foreach (var partition in profiles.Partition((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
                 {
                     var fileName = _fileNamingStrategy.BaseName(partition.First()) + "." + _serializer.FileExtension;
-                    using (var w = CreateOrOpen(fileName, writer => _serializer.WriteProfileHeader(writer)))
+                    using (var stream = CreateOrOpen(fileName, x => _serializer.WriteProfileHeader(x)))
                     {
-                        _serializer.Write(partition, w);
+                        _serializer.Write(partition, stream);
                     }
                 }
             }
@@ -89,19 +89,18 @@ namespace Wibblr.Metrics.Core
         /// <param name="fileName">Name of file</param>
         /// <param name="OnCreate">Action to execute if file was created</param>
         /// <returns></returns>
-        private StreamWriter CreateOrOpen(string fileName, Action<TextWriter> OnCreate)
+        private Stream CreateOrOpen(string fileName, Action<Stream> OnCreate)
         {
             var stream = new FileStream(fileName, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-            var writer = new StreamWriter(stream);
 
             var len = stream.Length;
 
             if (len == 0)
-                OnCreate(writer);
+                OnCreate(stream);
             else
                 stream.Seek(len, SeekOrigin.Begin);
             
-            return writer;
+            return stream;
         }
     }
 }

@@ -23,9 +23,9 @@ namespace Wibblr.Metrics.Core
     /// E 20210403T120000 x.y.z               <-- event
     /// S 20210403T120000 d.e.f 15            <-- sample
     /// </summary>
-    public class LineSerializer : IMetricsSerializer
+    public class LineSerializer : MetricsTextSerializer
     {
-        public string FileExtension => ".txt";
+        public override string FileExtension => ".txt";
 
         private string Printable(string s) =>
             new string(s.SelectMany(c =>  char.IsControl(c) ? ("0x" + ((int)c).ToString("X4")).ToCharArray() : new char[] { c }).ToArray());
@@ -47,7 +47,7 @@ namespace Wibblr.Metrics.Core
             return s.Substring(0, i + 1);
         }
 
-        public void Write(IEnumerable<WindowedCounter> counters, TextWriter writer)
+        public override void Write(IEnumerable<WindowedCounter> counters, TextWriter writer)
         {
             if (!counters.Any())
                 return;
@@ -58,7 +58,7 @@ namespace Wibblr.Metrics.Core
             writer.Flush();
         }
 
-        public void Write(IEnumerable<TimestampedEvent> events, TextWriter writer)
+        public override void Write(IEnumerable<TimestampedEvent> events, TextWriter writer)
         {
             if (!events.Any())
                 return;
@@ -69,7 +69,7 @@ namespace Wibblr.Metrics.Core
             writer.Flush();
         }
 
-        public void Write(IEnumerable<WindowedBucket> buckets, TextWriter writer)
+        public override void Write(IEnumerable<WindowedBucket> buckets, TextWriter writer)
         {
             if (!buckets.Any())
                 return;
@@ -80,23 +80,23 @@ namespace Wibblr.Metrics.Core
             writer.Flush();
         }
 
-        public void Write(IEnumerable<Profile> profiles, TextWriter writer)
+        public override void Write(IEnumerable<Profile> profiles, TextWriter writer)
         {
         }
 
-        public void WriteBucketHeader(TextWriter writer)
+        public override void WriteBucketHeader(TextWriter writer)
         {
         }
 
-        public void WriteCounterHeader(TextWriter writer)
+        public override void WriteCounterHeader(TextWriter writer)
         {
         }
 
-        public void WriteEventHeader(TextWriter writer)
+        public override void WriteEventHeader(TextWriter writer)
         {
         }
 
-        public void WriteProfileHeader(TextWriter writer)
+        public override void WriteProfileHeader(TextWriter writer)
         {
         }
     }

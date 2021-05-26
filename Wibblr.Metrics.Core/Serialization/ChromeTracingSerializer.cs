@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
+using System.Text;
+
 using Newtonsoft.Json;
 
 using Wibblr.Metrics.Plugins.Interfaces;
@@ -11,26 +13,26 @@ namespace Wibblr.Metrics.Core
     /// Chrome tracing serializer. Not actual JSON, as the array
     /// doesn't need to be finished
     /// </summary>
-    public class ChromeTracingSerializer : IMetricsSerializer, IFileNamingStrategy
+    public class ChromeTracingSerializer : MetricsTextSerializer, IFileNamingStrategy
     {
-        public string FileExtension { get => "json"; }
+        public override string FileExtension { get => "json"; }
 
-        public void WriteCounterHeader(TextWriter writer) { }
+        public override void WriteCounterHeader(TextWriter writer) { }
 
-        public void Write(IEnumerable<WindowedCounter> counters, TextWriter writer) { }
+        public override void Write(IEnumerable<WindowedCounter> counters, TextWriter writer) { }
 
-        public void WriteEventHeader(TextWriter writer) { }
+        public override void WriteEventHeader(TextWriter writer) { }
 
-        public void Write(IEnumerable<TimestampedEvent> events, TextWriter writer) { }
+        public override void Write(IEnumerable<TimestampedEvent> events, TextWriter writer) { }
 
-        public void WriteBucketHeader(TextWriter writer) { }
+        public override void WriteBucketHeader(TextWriter writer) { }
 
-        public void Write(IEnumerable<WindowedBucket> buckets, TextWriter writer) { }
-        
-        public void WriteProfileHeader(TextWriter writer) =>
-            writer.WriteLine("[");
+        public override void Write(IEnumerable<WindowedBucket> buckets, TextWriter writer) { }
 
-        public void Write(IEnumerable<Profile> profiles, TextWriter writer)
+        public override void WriteProfileHeader(TextWriter writer) =>
+            writer.Write('[');
+
+        public override void Write(IEnumerable<Profile> profiles, TextWriter writer)
         {
             // Assume profiles are in time order (at least for all events on a single thread)
             // as required by the chrometracing spec.
@@ -49,7 +51,7 @@ namespace Wibblr.Metrics.Core
                         {"tid", threadId}
                     }));
 
-                writer.WriteLine(",");
+                writer.WriteLine(',');
             }
         }
 

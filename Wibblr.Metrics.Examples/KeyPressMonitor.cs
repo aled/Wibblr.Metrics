@@ -41,7 +41,7 @@ namespace Wibblr.Metrics.Examples
             return Choose(title, x => x, choices);
         }
 
-        private IMetricsSerializer ChooseSerializer()
+        private MetricsTextSerializer ChooseSerializer()
         {
             switch (Choose("Select serializer", "Text", "Json objects", "Json chrometracing"))
             {
