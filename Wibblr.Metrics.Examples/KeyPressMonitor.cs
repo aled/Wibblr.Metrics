@@ -79,7 +79,7 @@ namespace Wibblr.Metrics.Examples
                 case "Database":
                     return ChooseDatabase("CockroachDb", "SqlServer");
                 case "Rest API":
-                    return new RestClient(new MetricsWriterSettings { BatchSize = 3, MaxQueuedRows = 100 }, "https://localhost:5001/Upload");
+                    return new RestClient(new MetricsWriterSettings { BatchSize = 3, MaxQueuedRows = 100 }, "https://localhost:5001/api/Upload");
                 default:
                     throw new Exception("Unknown choice");
             }

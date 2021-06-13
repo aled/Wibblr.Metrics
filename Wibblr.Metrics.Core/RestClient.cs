@@ -55,7 +55,7 @@ namespace Wibblr.Metrics.Core
                     var response = _client.Send(request);
 
                     if (!response.IsSuccessStatusCode)
-                        throw new Exception($"Http send failed with code {response.StatusCode}: {response.Content}");
+                        throw new Exception($"Http send failed with code {response.StatusCode}: {response.Content}. Json: {json}");
                 }
                 catch (Exception e)
                 {

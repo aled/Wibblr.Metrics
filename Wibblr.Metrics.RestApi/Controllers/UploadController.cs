@@ -41,25 +41,27 @@ namespace Wibblr.Metrics.RestApi.Controllers
         }
 
         [HttpPost]
-        [Route("Counter")]
-        public ActionResult Counter(IList<CounterModel> counters)
+        public ActionResult Counter(MetricsModel metrics)
         {
-            if (counters != null)
+            if (metrics != null)
             {
-                var validatedCounters = counters
-                    .Select(c => Validate(c));
+                if (metrics.Counters != null && metrics.Counters.Any())
+                {
+                    var validatedCounters = metrics.Counters
+                        .Select(c => Validate(c));
 
-                _database.Flush(validatedCounters
-                    .Where(c => c.success)
-                    .Select(c => new WindowedCounter
-                    {
-                        name = c.counter.Name,
-                        from = c.counter.From.UtcDateTime,
-                        to = c.counter.To.UtcDateTime,
-                        count = c.counter.Count
-                    }));
+                    _database.Flush(validatedCounters
+                        .Where(c => c.success)
+                        .Select(c => new WindowedCounter
+                        {
+                            name = c.counter.Name,
+                            from = c.counter.From.UtcDateTime,
+                            to = c.counter.To.UtcDateTime,
+                            count = c.counter.Count
+                        }));
 
-                return new JsonResult(validatedCounters.Select(c => new { c.success, c.message }));
+                    return new JsonResult(validatedCounters.Select(c => new { c.success, c.message }));
+                }
             }
             return new OkResult();
         }

@@ -8,12 +8,12 @@
 
 <MatButton @onclick="@(async e => await RefreshData())">Refresh Now</MatButton>
 
-<MatSlideToggle TValue="bool" Label="Auto Refresh" ValueChanged="@(e => AutoRefreshChanged(e))"></MatSlideToggle>
+<MatSlideToggle TValue="bool" Label="Auto Refresh" ValueChanged="@(e => AutoRefreshChanged(e))" Style="padding-right:.5em"></MatSlideToggle>
 
 <PlotlyChart @bind-Config="barConfig" @bind-Layout="barLayout" @bind-Data="barData" @ref="barChart" />
 
 @code {
-    Timer timer = new Timer(500);
+    Timer timer = new Timer(5000);
 
     PlotlyChart barChart;
     Config barConfig = new Config();
@@ -33,48 +33,49 @@
     }
 
     protected override void OnInitialized()
-  {
-    timer.Elapsed += OnTimer;
-  }
-
-
-  private void OnTimer(object source, ElapsedEventArgs e)
-  {
-    InvokeAsync(async () => await RefreshData());
-  }
-
-  // There must be a better way to prevent multiple simultaneous timer events
-  bool isRefreshing = false;
-
-  private async Task RefreshData()
-  {
-    if (isRefreshing)
     {
-      Console.WriteLine("IsRefreshing");
-      return;
+      timer.Elapsed += OnTimer;
     }
-    try
+
+
+    private void OnTimer(object source, ElapsedEventArgs e)
     {
-      isRefreshing = true;
+      InvokeAsync(async () => await RefreshData());
+    }
 
-      var counterResponse = await restApiClient.GetCountersAsync(new[] { "%" }, DateTimeOffset.Parse("2021-05-13T18:00"), DateTimeOffset.Parse("2021-05-14T00:00"), TimeSpan.FromSeconds(300));
+    // There must be a better way to prevent multiple simultaneous timer events
+    bool isRefreshing = false;
 
-      await barChart.Clear();
-
-      foreach (var c in counterResponse)
+    private async Task RefreshData()
+    {
+      if (isRefreshing)
       {
-        await barChart.AddTrace(
-            new Bar
-            {
-              Name = c.Name,
-              X = Enumerable.Range(1, c.Values.Count).Select(x => (object)c.From.AddSeconds(x * c.GroupBySeconds)).ToList(),
-              Y = c.Values
-            });
+        Console.WriteLine("IsRefreshing");
+        return;
+      }
+      try
+      {
+        isRefreshing = true;
+
+        var now = DateTimeOffset.Now;
+        var counterResponse = await restApiClient.GetCountersAsync(new[] { "%" }, now.Subtract(TimeSpan.FromHours(1)), now, TimeSpan.FromSeconds(300));
+
+        await barChart.Clear();
+
+        foreach (var c in counterResponse)
+        {
+          await barChart.AddTrace(
+              new Bar
+              {
+                Name = c.Name,
+                X = Enumerable.Range(1, c.Values.Count).Select(x => (object)c.From.AddSeconds(x * c.GroupBySeconds)).ToList(),
+                Y = c.Values
+              });
+        }
+      }
+      finally
+      {
+        isRefreshing = false;
       }
     }
-    finally
-    {
-      isRefreshing = false;
-    }
-  }
 }

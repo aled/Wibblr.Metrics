@@ -66,6 +66,8 @@ namespace Wibblr.Metrics.Core
 
             clock.SetDelayedAction(Flush);
             clock.ExecuteAfterDelay(flushInterval);
+
+            Event("_wibblr.metrics.initialized");
         }
 
         /// <summary>
@@ -91,6 +93,20 @@ namespace Wibblr.Metrics.Core
         public MetricsCollector(IMetricsSink sink)
             : this(sink, new Clock(), TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(60), false) { }
 
+
+        private bool ValidateName(string name, out string message)
+        {
+            message = null;
+         
+            if (name == null)
+                message = "Invalid name";
+
+            else if (name.Length > 1000)
+                message = "Name too long";
+            
+            return message == null;
+        }
+
         #region Counters
         /// <summary>
         /// Increments a counter.
@@ -99,8 +115,11 @@ namespace Wibblr.Metrics.Core
         /// <param name="increment">Increment.</param>
         public void IncrementCounter(string name, long increment = 1)
         {
-            if (name.Length > 8000)
-                name = name.Substring(0, 8000);
+            if (!ValidateName(name, out var message))
+            {
+                Console.Error.WriteLine(message);
+                return;
+            }
 
             try
             {
@@ -130,8 +149,11 @@ namespace Wibblr.Metrics.Core
 
         public void IncrementBucket(string name, float value)
         {
-            if (name.Length > 8000)
-                name = name.Substring(0, 8000);
+            if (!ValidateName(name, out var message))
+            {
+                Console.Error.WriteLine(message);
+                return;
+            }
 
             try
             {
@@ -158,14 +180,28 @@ namespace Wibblr.Metrics.Core
         #endregion Histograms
 
         #region Events
-        public void Event(string name)
+        private static readonly int[] precisionTicks = new[] { 10000000, 1000000, 100000, 10000, 1000, 100, 10, 1 };
+     
+        public void Event(string name, int precision = 3)
         {
-            if (name.Length > 8000)
-                name = name.Substring(0, 8000);
+            if (!ValidateName(name, out var message))
+            {
+                Console.Error.WriteLine(message);
+                return;
+            }
+
+            if (precision < 0 || precision > 7)
+            {
+                Console.Error.WriteLine("Invalid precision");
+                return;
+            }
 
             try
             {
                 var timestamp = DateTime.UtcNow;
+
+                if (precision < 7)
+                    timestamp = timestamp.RoundDown(TimeSpan.FromTicks(precisionTicks[precision]));
 
                 lock (eventsLock)
                 {
@@ -348,7 +384,7 @@ namespace Wibblr.Metrics.Core
             {
                 Console.Error.Write(e.Message);
             }
-         }
+        }
 
         /// <summary>
         /// Releases all resource used by the <see cref="T:Wibblr.Metrics.Core.EventCollector"/> object.

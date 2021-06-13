@@ -46,9 +46,11 @@ namespace Wibblr.Metrics.RestApi.Controllers
             {
                 counterResponses.Add(new CounterResponseModel { Name = partition.First().name, From = from, GroupBySeconds = groupBySeconds, Values = new List<object>() });
 
-                foreach (var c in partition)
-                    for (var expected = fromUtc; expected < toUtc; expected = expected + groupBy)
-                        counterResponses.Last().Values.Add(expected == c.from ? c.count : 0);
+                // Make dictionary of from => count
+                var dict = partition.ToDictionary(x => x.from, x => x.count);
+
+                for (var expected = fromUtc; expected < toUtc; expected = expected + groupBy)
+                    counterResponses.Last().Values.Add(dict.ContainsKey(expected) ? dict[expected] : 0);
             }
 
             return new JsonResult(counterResponses);
