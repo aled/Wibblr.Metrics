@@ -6,16 +6,16 @@ namespace Wibblr.Metrics.Core
 {
     public interface IFileNamingStrategy
     {
-        string BaseName(WindowedCounter counter);
+        string Basename(WindowedCounter counter);
         bool EqualNames(WindowedCounter a, WindowedCounter b);
 
-        string BaseName(TimestampedEvent timestampedEvent);
+        string Basename(TimestampedEvent timestampedEvent);
         bool EqualNames(TimestampedEvent a, TimestampedEvent b);
 
-        string BaseName(WindowedBucket bucket);
+        string Basename(WindowedBucket bucket);
         bool EqualNames(WindowedBucket a, WindowedBucket b);
 
-        string BaseName(Profile profile);
+        string Basename(Profile profile);
         bool EqualNames(Profile a, Profile b);
     }
 }

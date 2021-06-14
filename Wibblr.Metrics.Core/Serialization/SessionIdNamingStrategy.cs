@@ -7,13 +7,13 @@ namespace Wibblr.Metrics.Core
     /// </summary>
     public class SessionIdNamingStrategy : IFileNamingStrategy
     {
-        public string BaseName(WindowedCounter counter) => null;
+        public string Basename(WindowedCounter counter) => null;
 
-        public string BaseName(TimestampedEvent timestampedEvent) => null;
+        public string Basename(TimestampedEvent timestampedEvent) => null;
  
-        public string BaseName(WindowedBucket bucket) => null;
+        public string Basename(WindowedBucket bucket) => null;
 
-        public string BaseName(Profile profile) => profile.sessionId;
+        public string Basename(Profile profile) => profile.sessionId;
 
         public bool EqualNames(WindowedCounter a, WindowedCounter b) => true;
 

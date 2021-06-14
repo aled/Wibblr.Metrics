@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Text;
 
 using Newtonsoft.Json;
 
@@ -55,19 +54,19 @@ namespace Wibblr.Metrics.Core
             }
         }
 
-        public string BaseName(WindowedCounter counter) => null;
+        public string Basename(WindowedCounter counter) => null;
 
         public bool EqualNames(WindowedCounter a, WindowedCounter b) => true;
 
-        public string BaseName(TimestampedEvent timestampedEvent) => null;
+        public string Basename(TimestampedEvent timestampedEvent) => null;
 
         public bool EqualNames(TimestampedEvent a, TimestampedEvent b) => true;
 
-        public string BaseName(WindowedBucket bucket) => null;
+        public string Basename(WindowedBucket bucket) => null;
 
         public bool EqualNames(WindowedBucket a, WindowedBucket b) => true;
 
-        public string BaseName(Profile profile) => $"{profile.sessionId}.chrometracing";
+        public string Basename(Profile profile) => $"{profile.sessionId}.chrometracing";
 
         public bool EqualNames(Profile a, Profile b) => a.sessionId == b.sessionId;
     }

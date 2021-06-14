@@ -10,7 +10,7 @@ namespace Wibblr.Metrics.Plugins.SqlServer
 {
     // TODO: refactor out common code in various Flush() methods
 
-    public class SqlServerSink : IDatabasePlugin
+    public class SqlServerPlugin : IDatabasePlugin
     {
         const int TIMEOUT_SECONDS = 60;
 
