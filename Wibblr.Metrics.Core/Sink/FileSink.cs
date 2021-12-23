@@ -26,7 +26,7 @@ namespace Wibblr.Metrics.Core
         {
             if (counters.Any())
             {
-                foreach (var partition in counters.Partition((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
+                foreach (var partition in counters.SplitAt((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
                 {
                     var fileName = _fileNamingStrategy.Basename(partition.First()) + "." + _serializer.FileExtension;
                     using (var stream = CreateOrOpen(fileName, x => _serializer.WriteCounterHeader(x)))
@@ -39,7 +39,7 @@ namespace Wibblr.Metrics.Core
         {
             if (buckets.Any())
             {
-                foreach (var partition in buckets.Partition((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
+                foreach (var partition in buckets.SplitAt((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
                 {
                     var fileName = _fileNamingStrategy.Basename(partition.First()) + "." + _serializer.FileExtension;
                     using (var stream = CreateOrOpen(fileName, x => _serializer.WriteBucketHeader(x)))
@@ -52,7 +52,7 @@ namespace Wibblr.Metrics.Core
         {
             if (events.Any())
             {
-                foreach (var partition in events.Partition((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
+                foreach (var partition in events.SplitAt((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
                 {
                     var fileName = _fileNamingStrategy.Basename(partition.First()) + "." + _serializer.FileExtension;
                     using (var stream = CreateOrOpen(fileName, x => _serializer.WriteEventHeader(x)))
@@ -65,7 +65,7 @@ namespace Wibblr.Metrics.Core
         {
             if (profiles.Any())
             {
-                foreach (var partition in profiles.Partition((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
+                foreach (var partition in profiles.SplitAt((a, b) => !_fileNamingStrategy.EqualNames(a, b)))
                 {
                     var fileName = _fileNamingStrategy.Basename(partition.First()) + "." + _serializer.FileExtension;
                     using (var stream = CreateOrOpen(fileName, x => _serializer.WriteProfileHeader(x)))

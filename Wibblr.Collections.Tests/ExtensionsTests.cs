@@ -43,7 +43,7 @@ namespace Wibblr.Collections.Tests
         public void PartitionedListShouldHandleEmptyList()
         {
             var partitionedList = L()
-                .Partition((x, y) => true)
+                .SplitAt((x, y) => true)
                 .Select(sublist => sublist.ToList())
                 .ToList();
 
@@ -54,7 +54,7 @@ namespace Wibblr.Collections.Tests
         public void PartitionedListShouldHandleSingletonList()
         {
             var partitionedList = L(1)
-                .Partition((x, y) => true)
+                .SplitAt((x, y) => true)
                 .Select(sublist => sublist.ToList())
                 .ToList();
 
@@ -65,7 +65,7 @@ namespace Wibblr.Collections.Tests
         public void PartitionedListShouldPartitionEvensAndOdds()
         {
             var partitionedList = L(1, 3, 5, 2, 4, 7, 8)
-                .Partition((x, y) => x % 2 != y % 2)
+                .SplitAt((x, y) => x % 2 != y % 2)
                 .Select(sublist => sublist.ToList())
                 .ToList();
 

@@ -34,8 +34,8 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                 Username = connectionSettings.Username,
                 Password = connectionSettings.Password,
                 Database = connectionSettings.Database,
-                SslMode = connectionSettings.RequireSsl ? SslMode.Require : SslMode.Prefer,
-                RootCertificate = connectionSettings.CaCertFile
+                SslMode = connectionSettings.RequireSsl ? SslMode.VerifyFull : SslMode.Prefer,
+                RootCertificate = connectionSettings.CaCertFile,
             }.ConnectionString;
 
             var databaseName = _connectionSettings.Database;
@@ -124,7 +124,8 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                     b.name,
                     b.from,
                     b.to,
-                    b.count }));
+                    b.count 
+                }));
         }
 
         public void Flush(IEnumerable<WindowedBucket> buckets)
@@ -136,7 +137,8 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                     b.timeTo,
                     b.valueFrom ?? int.MinValue,
                     b.valueTo ?? int.MaxValue,
-                    b.count }));
+                    b.count 
+                }));
         }
 
         public void Flush(IEnumerable<TimestampedEvent> events)
@@ -144,7 +146,8 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
             eventTable.Insert(
                 events.Select(e => new object[] { 
                     e.name, 
-                    e.timestamp }));
+                    e.timestamp 
+                }));
         }
 
         public void Flush(IEnumerable<Profile> profiles)
@@ -156,7 +159,8 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                         p.process,
                         p.thread,
                         p.timestamp,
-                        p.phase }));
+                        p.phase 
+                }));
         }
 
         /// <summary>

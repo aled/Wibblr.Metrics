@@ -1,6 +1,8 @@
 using System;
 using System.Threading;
 
+using Wibblr.Utils;
+
 namespace Wibblr.Metrics.Core
 {
     internal class Clock : IClock

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Text;
 using Npgsql;
 using Wibblr.Collections;
+using Wibblr.Utils;
 using Wibblr.Metrics.Plugins.Interfaces;
 
 namespace Wibblr.Metrics.Plugins.CockroachDb
@@ -54,7 +55,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
             ExecuteNonQuery($"CREATE TABLE IF NOT EXISTS {_databaseName.SqlQuote()}.{Name.SqlQuote()}\n(\n  {string.Join(",\n  ", Columns)},\n  PRIMARY KEY({PrimaryKey})\n);");
         }
         
-        private IEnumerable<string> InsertColumns
+        private IEnumerable<string> ColumnsToInsert
         {
             get => Columns
                 .Where(c => string.IsNullOrEmpty(c.DefaultFunction))
@@ -69,12 +70,12 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
             foreach (var (item, i) in batch.ZipWithIndex())
             {
                 if (i == 0)
-                    sql.Append($"INSERT INTO {_databaseName.SqlQuote()}.{Name.SqlQuote()} (\n  {string.Join(",\n  ", InsertColumns)}) VALUES\n  ");
+                    sql.Append($"INSERT INTO {_databaseName.SqlQuote()}.{Name.SqlQuote()} (\n  {string.Join(",\n  ", ColumnsToInsert)}) VALUES\n  ");
                  else
                     sql.Append(",\n  ");
 
                 sql.Append("(");
-                for (int j = 0; j < InsertColumns.Count(); j++)
+                for (int j = 0; j < ColumnsToInsert.Count(); j++)
                 {
                     if (j > 0)
                         sql.Append(", ");

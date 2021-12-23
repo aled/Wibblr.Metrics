@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="System.Data.SqlClient" Version="4.8.2" />
+    <PackageReference Include="System.Data.SqlClient" Version="4.8.3" />
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Wibblr.Collections\Wibblr.Collections.csproj" />
     <ProjectReference Include="..\Wibblr.Metrics.Plugins.Interfaces\Wibblr.Metrics.Plugins.Interfaces.csproj" />
+    <ProjectReference Include="..\Wibblr.Utils\Wibblr.Utils.csproj" />
   </ItemGroup>
 
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">

@@ -9,9 +9,10 @@
   <ItemGroup>
     <ProjectReference Include="..\Wibblr.Collections\Wibblr.Collections.csproj" />
     <ProjectReference Include="..\Wibblr.Metrics.Plugins.Interfaces\Wibblr.Metrics.Plugins.Interfaces.csproj" />
+    <ProjectReference Include="..\Wibblr.Utils\Wibblr.Utils.csproj" />
   </ItemGroup>
   <ItemGroup>
-    <PackageReference Include="Npgsql" Version="5.0.5" />
+    <PackageReference Include="Npgsql" Version="6.0.2" />
   </ItemGroup>
   <Target Name="PostBuild" AfterTargets="PostBuildEvent">
     <!--<Exec Command="xcopy /Y $(TargetPath) $(SolutionDir)Wibblr.Metrics.Examples\bin\$(ConfigurationName)\net5.0\&#xD;&#xA;xcopy /Y $(TargetPath) $(SolutionDir)Wibblr.Metrics.RestApi\bin\$(ConfigurationName)\net5.0\" />-->

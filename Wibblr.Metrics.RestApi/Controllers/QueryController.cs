@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
-
 using Microsoft.AspNetCore.Mvc;
-
 using Wibblr.Collections;
-using Wibblr.Metrics.Core;
+using Wibblr.Utils;
 using Wibblr.Metrics.Plugins.Interfaces;
 using Wibblr.Metrics.RestApiModels;
 
@@ -42,7 +39,7 @@ namespace Wibblr.Metrics.RestApi.Controllers
             var counterResponses = new List<CounterResponseModel>();
 
             // partition by counter name
-            foreach (var partition in aggregatedCounters.Partition((a, b) => a.name != b.name))
+            foreach (var partition in aggregatedCounters.SplitAt((a, b) => a.name != b.name))
             {
                 counterResponses.Add(new CounterResponseModel { Name = partition.First().name, From = from, GroupBySeconds = groupBySeconds, Values = new List<object>() });
 

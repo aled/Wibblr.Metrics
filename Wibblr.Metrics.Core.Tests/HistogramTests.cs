@@ -1,6 +1,7 @@
 ﻿using System;
 using FluentAssertions;
 using Xunit;
+using Wibblr.Utils;
 
 namespace Wibblr.Metrics.Core.Tests
 {

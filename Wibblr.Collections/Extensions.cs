@@ -1,10 +1,16 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace Wibblr.Collections
 {
     public static class Extensions
     {
+        public static LookAheadEnumerator<T> GetLookAheadEnumerator<T>(this IEnumerable<T> items)
+        {
+            return new LookAheadEnumerator<T>(items);
+        }
+
         // returns number of items actually removed
         public static int DropLast<T>(this List<T> items, int count)
         {
@@ -12,11 +18,6 @@ namespace Wibblr.Collections
             var index = items.Count - numItemsToRemove;
             items.RemoveRange(index, numItemsToRemove);
             return numItemsToRemove;
-        }
-
-        public static LookAheadEnumerator<T> GetLookAheadEnumerator<T>(this IEnumerable<T> items)
-        {
-            return new LookAheadEnumerator<T>(items);
         }
 
         private static IEnumerable<T> TakeUntil<T>(this LookAheadEnumerator<T> e, Func<T, T, bool> predicate)
@@ -32,7 +33,14 @@ namespace Wibblr.Collections
             }
         }
 
-        public static IEnumerable<IEnumerable<T>> Partition<T>(this IEnumerable<T> items, Func<T, T, bool> partitionPredicate)
+        /// <summary>
+        /// Split an IEnumerable into batches based on a predicate
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="items"></param>
+        /// <param name="partitionPredicate"></param>
+        /// <returns></returns>
+        public static IEnumerable<IEnumerable<T>> SplitAt<T>(this IEnumerable<T> items, Func<T, T, bool> partitionPredicate)
         {
             var enumerator = items.GetLookAheadEnumerator();
 

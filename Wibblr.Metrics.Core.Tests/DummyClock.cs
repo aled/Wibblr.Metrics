@@ -2,6 +2,8 @@
 using System.Globalization;
 using System.Threading.Tasks;
 
+using Wibblr.Utils;
+
 namespace Wibblr.Metrics.Core.Tests
 {
     public class DummyClock : IClock
