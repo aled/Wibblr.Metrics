@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Data;
-using System.Data.SqlClient;
 using System.Linq;
 using System.Reflection;
 
@@ -86,27 +84,6 @@ namespace Wibblr.Metrics.Plugins.SqlServer
             profileTable.Initialize();
         }
 
-        private void ExecuteSql(string sql)
-        {
-            try 
-            {
-                using (var con = new SqlConnection(_connectionSettings.ConnectionString))
-                {
-                    con.Open();
-                    using (var cmd = new SqlCommand(sql, con))
-                    {
-                        cmd.CommandTimeout = 30;
-                        cmd.CommandType = CommandType.Text;
-                        cmd.ExecuteNonQuery();
-                    }
-                }
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e.Message);
-            }
-        }
-
         public void Flush(IEnumerable<WindowedCounter> counters)
         {
             counterTable.Insert(counters.Select(c => new object[] {
@@ -161,7 +138,7 @@ namespace Wibblr.Metrics.Plugins.SqlServer
 
         public IEnumerable<WindowedCounter> GetAggregatedCounters(IList<string> names, DateTime from, DateTime to, TimeSpan groupBy)
         {
-            throw new NotImplementedException();
+            return counterTable.Aggregate(names, from, to, groupBy);
         }
     }
 }

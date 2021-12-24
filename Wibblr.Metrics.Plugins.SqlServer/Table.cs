@@ -5,6 +5,7 @@ using System.Data.SqlClient;
 using System.Linq;
 
 using Wibblr.Metrics.Plugins.Interfaces;
+using Wibblr.Utils;
 
 namespace Wibblr.Metrics.Plugins.SqlServer
 {
@@ -115,6 +116,43 @@ namespace Wibblr.Metrics.Plugins.SqlServer
                     Console.WriteLine(e.Message);
                 }
             }
+        }
+
+        internal IEnumerable<WindowedCounter> Aggregate(IList<string> names, DateTime from, DateTime to, TimeSpan groupBy)
+        {
+            var groupBySeconds = (int)groupBy.TotalSeconds;
+            var counters = new List<WindowedCounter>();
+            var nameParameters = Enumerable.Range(0, names.Count()).Select(x => $"@n_{x}").ToList();
+            var nameParametersClause = "(" + string.Join(" or ", nameParameters.Select(x => $"countername like {x}")) + ") ";
+
+            var sql = ";with t as (select countername, count, dateadd(second, convert(int, datediff(second, convert(date, starttime), starttime) / @window) * @window, convert(datetime, convert(date, starttime))) as [from] " +
+                      "from MetricsCounter where startTime >= @from and endtime <= @to AND " + nameParametersClause + ") " +
+                      "select top 10000 countername, [from], sum(count) as count from t " +
+                      "group by CounterName, [from] " +
+                      "order by CounterName, [from] ";
+            
+            using (var con = new SqlConnection(_connectionString))
+            {
+                con.Open();
+                using (var cmd = new SqlCommand(sql, con))
+                {
+                    cmd.Parameters.AddWithValue("@window", groupBySeconds);
+                    cmd.Parameters.AddWithValue("@from", from);
+                    cmd.Parameters.AddWithValue("@to", to);
+
+                    foreach (var nameParameter in nameParameters.ZipWithIndex())
+                        cmd.Parameters.AddWithValue(nameParameter.Item1, names[nameParameter.Item2]);
+
+                    cmd.CommandType = CommandType.Text;
+
+                    using (var rdr = cmd.ExecuteReader())
+                    {
+                        while (rdr.Read())
+                            counters.Add(new WindowedCounter { name = (string)rdr["countername"], from = (DateTime)rdr["from"], to = ((DateTime)rdr["from"]).Add(groupBy), count = Convert.ToInt64(rdr["count"]) });
+                    }
+                }
+            }
+            return counters;
         }
     }
 }

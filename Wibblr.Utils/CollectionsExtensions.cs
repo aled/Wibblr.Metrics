@@ -28,17 +28,17 @@ namespace Wibblr.Utils
                 yield return batch;
         }
 
+        public static bool IsEmpty<T>(this IEnumerable<T> items) =>
+            !items.Any();
+
+        public static string Join(this IEnumerable<string> items, string separator = ", ") =>
+            string.Join(separator, items);
+
         public static IEnumerable<(T, int)> ZipWithIndex<T>(this IEnumerable<T> items)
         {
             var i = 0;
             foreach (var item in items)
                 yield return (item, i++);
         }
-
-        public static bool IsEmpty<T>(this IEnumerable<T> items) =>
-            !items.Any();
-
-        public static string Join(this IEnumerable<string> items, string separator = ", ") =>
-            string.Join(separator, items);
     }
 }
