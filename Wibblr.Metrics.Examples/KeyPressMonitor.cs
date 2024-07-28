@@ -1,9 +1,11 @@
 ﻿using System;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Reflection;
-using System.IO;
+
 using Microsoft.Extensions.Configuration;
+
 using Wibblr.Metrics.Core;
 using Wibblr.Metrics.Plugins.Interfaces;
 
@@ -11,7 +13,7 @@ namespace Wibblr.Metrics.Examples
 {
     public class KeyPressMonitor
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             var configuration = new ConfigurationBuilder()
                 .SetBasePath(Directory.GetCurrentDirectory())
@@ -30,7 +32,6 @@ namespace Wibblr.Metrics.Examples
 
                 for (int i = 0; i < choices.Length; i++)
                     Console.WriteLine($"{i + 1}. {getName(choices[i])}");
-
             } while (!int.TryParse(Console.ReadLine(), out choice));
 
             return choices[choice - 1];
@@ -47,10 +48,13 @@ namespace Wibblr.Metrics.Examples
             {
                 case "Text":
                     return new LineSerializer();
+
                 case "Json objects":
                     return new JsonObjectsSerializer();
+
                 case "Json chrometracing":
                     return new ChromeTracingSerializer();
+
                 default:
                     throw new Exception("Unknown choice");
             }
@@ -63,7 +67,7 @@ namespace Wibblr.Metrics.Examples
 
             var availablePlugins = pluginNames
                 .SelectMany(name => factory.LoadPlugin<IDatabasePlugin>(Assembly.GetExecutingAssembly(), name))
-                .ToArray();         
+                .ToArray();
 
             return Choose("Select database plugin:", x => x.Name, availablePlugins);
         }
@@ -74,12 +78,16 @@ namespace Wibblr.Metrics.Examples
             {
                 case "Console":
                     return new TextWriterSink(Console.Out, ChooseSerializer());
+
                 case "File":
                     return new FileSink(ChooseSerializer(), new DateTimeFileNamingStrategy("ddMMyy-HHmm"));
+
                 case "Database":
                     return ChooseDatabase("CockroachDb", "SqlServer");
+
                 case "Rest API":
                     return new RestClient(new MetricsWriterSettings { BatchSize = 3, MaxQueuedRows = 100 }, "https://localhost:5001/api/Upload");
+
                 default:
                     throw new Exception("Unknown choice");
             }
@@ -124,7 +132,6 @@ namespace Wibblr.Metrics.Examples
                         metrics.EndInterval("session", key.ToString().ToLower());
 
                     stopwatch.Reset();
-
                 } while (key != '\r' && key != '\n');
             }
 

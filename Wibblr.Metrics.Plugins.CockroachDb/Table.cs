@@ -3,10 +3,12 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text;
+
 using Npgsql;
+
 using Wibblr.Collections;
-using Wibblr.Utils;
 using Wibblr.Metrics.Plugins.Interfaces;
+using Wibblr.Utils;
 
 namespace Wibblr.Metrics.Plugins.CockroachDb
 {
@@ -54,7 +56,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
         {
             ExecuteNonQuery($"CREATE TABLE IF NOT EXISTS {_databaseName.SqlQuote()}.{Name.SqlQuote()}\n(\n  {string.Join(",\n  ", Columns)},\n  PRIMARY KEY({PrimaryKey})\n);");
         }
-        
+
         private IEnumerable<string> ColumnsToInsert
         {
             get => Columns
@@ -71,7 +73,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
             {
                 if (i == 0)
                     sql.Append($"INSERT INTO {_databaseName.SqlQuote()}.{Name.SqlQuote()} (\n  {string.Join(",\n  ", ColumnsToInsert)}) VALUES\n  ");
-                 else
+                else
                     sql.Append(",\n  ");
 
                 sql.Append("(");
@@ -92,7 +94,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
             cmd.CommandType = CommandType.Text;
             cmd.CommandTimeout = 30;
 
-            return cmd; 
+            return cmd;
         }
 
         private bool TryDequeueBatch(out List<object[]> batch)
@@ -107,7 +109,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
 
         internal void Insert(IEnumerable<object[]> items)
         {
-            lock(_queueLock)
+            lock (_queueLock)
             {
                 _queue.Enqueue(items);
 
@@ -133,12 +135,12 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
 
         internal IEnumerable<WindowedCounter> Aggregate(IList<string> names, DateTime from, DateTime to, TimeSpan groupBy)
         {
-            var groupBySeconds = (int) groupBy.TotalSeconds;
+            var groupBySeconds = (int)groupBy.TotalSeconds;
             var counters = new List<WindowedCounter>();
             var nameParameters = Enumerable.Range(0, names.Count()).Select(x => $"@n_{x}").ToList();
             var nameParametersClause = "(" + string.Join(" or ", nameParameters.Select(x => $"countername like {x}")) + ") ";
 
-            var sql = $"select countername, (starttime::date)::timestamp + (((extract(epoch from starttime) % 86400) / @window)::int * @window::int) * interval '1 second' as from, sum(count) as count from {_databaseName.SqlQuote()}.{Name.SqlQuote()} " + 
+            var sql = $"select countername, (starttime::date)::timestamp + (((extract(epoch from starttime) % 86400) / @window)::int * @window::int) * interval '1 second' as from, sum(count) as count from {_databaseName.SqlQuote()}.{Name.SqlQuote()} " +
                 $"where starttime >= @from and endtime <= @to and " +
                 nameParametersClause +
                 "group by 1,2 " +
@@ -154,9 +156,9 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                     cmd.Parameters.AddWithValue("@from", from);
                     cmd.Parameters.AddWithValue("@to", to);
 
-                    foreach(var nameParameter in nameParameters.ZipWithIndex())
+                    foreach (var nameParameter in nameParameters.ZipWithIndex())
                         cmd.Parameters.AddWithValue(nameParameter.Item1, names[nameParameter.Item2]);
-                    
+
                     cmd.CommandType = CommandType.Text;
 
                     using (var rdr = cmd.ExecuteReader())

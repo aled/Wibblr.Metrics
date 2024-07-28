@@ -8,7 +8,7 @@ namespace Wibblr.Metrics.Core
 {
     public class PluginFactory
     {
-        public IEnumerable<T> LoadPlugin<T>(Assembly currentlyExecutingAssembly, string pluginName) where T: class
+        public IEnumerable<T> LoadPlugin<T>(Assembly currentlyExecutingAssembly, string pluginName) where T : class
         {
             var pluginFilename = pluginName.Contains(".")
                ? $"{pluginName}.dll"
@@ -26,7 +26,7 @@ namespace Wibblr.Metrics.Core
             return Assembly.Load(bytes);
         }
 
-        private IEnumerable<T> CreatePluginObjects<T>(Assembly assembly) where T: class
+        private IEnumerable<T> CreatePluginObjects<T>(Assembly assembly) where T : class
         {
             return assembly
                 .GetTypes()

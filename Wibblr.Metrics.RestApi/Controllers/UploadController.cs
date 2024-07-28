@@ -1,6 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -30,7 +28,6 @@ namespace Wibblr.Metrics.RestApi.Controllers
 
             if (c.To <= c.From)
                 message = "'To' must be later than 'From'";
-
             else
             {
                 message = "Ok";

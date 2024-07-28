@@ -11,12 +11,12 @@ namespace Wibblr.Metrics.Core
     /// Simple text format for metrics (not including profiles):
     /// time = YYYYMMDDHHMMSS[.FFFFFFF]       (fractional seconds are optional)
     /// window = N[s|m|h|d]                   (defaults to seconds if no units)
-    /// 
+    ///
     /// C = counter
     /// H = histogram
     /// V = event
     /// S = sample
-    /// 
+    ///
     /// e.g.
     /// C 20210403T120000 60 a.b.c 14         <-- counter 'a.b.c' has value 14 during the interval between 2021-04-03 12:00:00 and 2021-04-03 12:01:00
     /// H 20210403T120000 60 a.b.c 0-200 14   <-- histogram 'a.b.c' has value 14 in the bucket 0-200
@@ -28,7 +28,7 @@ namespace Wibblr.Metrics.Core
         public override string FileExtension => ".txt";
 
         private string Printable(string s) =>
-            new string(s.SelectMany(c =>  char.IsControl(c) ? ("0x" + ((int)c).ToString("X4")).ToCharArray() : new char[] { c }).ToArray());
+            new string(s.SelectMany(c => char.IsControl(c) ? ("0x" + ((int)c).ToString("X4")).ToCharArray() : new char[] { c }).ToArray());
 
         private string FormatTimestamp(DateTime dt)
         {

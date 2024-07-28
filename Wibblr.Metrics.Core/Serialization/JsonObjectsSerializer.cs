@@ -1,6 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using System.IO;
+
 using Newtonsoft.Json;
 
 using Wibblr.Metrics.Plugins.Interfaces;
@@ -14,7 +14,8 @@ namespace Wibblr.Metrics.Core
     {
         public override string FileExtension { get => "json"; }
 
-        public override void WriteEventHeader(TextWriter writer) { }
+        public override void WriteEventHeader(TextWriter writer)
+        { }
 
         public override void Write(IEnumerable<TimestampedEvent> timestampedEvents, TextWriter writer)
         {
@@ -22,7 +23,8 @@ namespace Wibblr.Metrics.Core
                 writer.WriteLine(JsonConvert.SerializeObject(e));
         }
 
-        public override void WriteCounterHeader(TextWriter writer) { }
+        public override void WriteCounterHeader(TextWriter writer)
+        { }
 
         public override void Write(IEnumerable<WindowedCounter> counters, TextWriter writer)
         {
@@ -30,7 +32,8 @@ namespace Wibblr.Metrics.Core
                 writer.WriteLine(JsonConvert.SerializeObject(c));
         }
 
-        public override void WriteBucketHeader(TextWriter writer) { }
+        public override void WriteBucketHeader(TextWriter writer)
+        { }
 
         public override void Write(IEnumerable<WindowedBucket> buckets, TextWriter writer)
         {
@@ -38,7 +41,8 @@ namespace Wibblr.Metrics.Core
                 writer.WriteLine(JsonConvert.SerializeObject(b));
         }
 
-        public override void WriteProfileHeader(TextWriter writer) { }
+        public override void WriteProfileHeader(TextWriter writer)
+        { }
 
         public override void Write(IEnumerable<Profile> profiles, TextWriter writer)
         {

@@ -3,14 +3,14 @@
 namespace Wibblr.Metrics.Core
 {
     /// <summary>
-    /// Class only useful for writing 
+    /// Class only useful for writing
     /// </summary>
     public class SessionIdNamingStrategy : IFileNamingStrategy
     {
         public string Basename(WindowedCounter counter) => null;
 
         public string Basename(TimestampedEvent timestampedEvent) => null;
- 
+
         public string Basename(WindowedBucket bucket) => null;
 
         public string Basename(Profile profile) => profile.sessionId;

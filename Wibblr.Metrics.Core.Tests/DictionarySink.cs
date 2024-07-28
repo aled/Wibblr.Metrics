@@ -7,10 +7,10 @@ namespace Wibblr.Metrics.Core.Tests
 {
     public class DictionarySink : IMetricsSink
     {
-        public Dictionary<Metric, long> Counters { get; } = 
+        public Dictionary<Metric, long> Counters { get; } =
             new Dictionary<Metric, long>();
-        
-        public Dictionary<Metric, Dictionary<(int, int), long>> Buckets { get; } = 
+
+        public Dictionary<Metric, Dictionary<(int, int), long>> Buckets { get; } =
             new Dictionary<Metric, Dictionary<(int, int), long>>();
 
         public void Flush(IEnumerable<WindowedCounter> counters)
@@ -41,7 +41,7 @@ namespace Wibblr.Metrics.Core.Tests
                 }
                 else
                 {
-                    Buckets[metric] = new Dictionary<(int, int), long> { { bucketKey, wb.count } };  
+                    Buckets[metric] = new Dictionary<(int, int), long> { { bucketKey, wb.count } };
                 }
             }
         }

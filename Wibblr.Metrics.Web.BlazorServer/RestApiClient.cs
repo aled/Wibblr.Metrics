@@ -1,14 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Threading.Tasks;
+using System.Linq;
+using System.Net;
 using System.Net.Http;
 using System.Text.Json;
+using System.Threading.Tasks;
 
 using Wibblr.Metrics.RestApiModels;
-using System.Text;
-using System.Net;
-using System.Collections.Specialized;
-using System.Linq;
 
 namespace Wibblr.Metrics.Web.BlazorServer
 {
@@ -46,7 +44,7 @@ namespace Wibblr.Metrics.Web.BlazorServer
     public class RestApiClient
     {
         public HttpClient _httpClient;
-        
+
         private static JsonSerializerOptions options = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true

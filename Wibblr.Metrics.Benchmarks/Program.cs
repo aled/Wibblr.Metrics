@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Linq;
+
 using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Jobs;
 using BenchmarkDotNet.Running;
+
 using Wibblr.Metrics.Core;
 using Wibblr.Metrics.Plugins.Interfaces;
 
@@ -10,19 +12,19 @@ namespace Wibblr.Metrics.Benchmarks
 {
     public class Program
     {
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             BenchmarkRunner.Run<CountingBenchmark>();
         }
     }
 
-    [SimpleJob(RuntimeMoniker.NetCoreApp50)]
+    [SimpleJob(RuntimeMoniker.Net80)]
     public class CountingBenchmark
     {
-        MetricsCollector metrics;
-        string[] names;
-        Random random = new Random();
-        IMetricsSink sink;
+        private MetricsCollector metrics;
+        private string[] names;
+        private Random random = new Random();
+        private IMetricsSink sink;
 
         [GlobalSetup]
         public void Setup()
@@ -43,7 +45,7 @@ namespace Wibblr.Metrics.Benchmarks
             metrics.Dispose();
 
         [Benchmark]
-        public void IncrementCounter() => 
+        public void IncrementCounter() =>
             metrics.IncrementCounter(names[random.Next() % 50]);
 
         [Benchmark]

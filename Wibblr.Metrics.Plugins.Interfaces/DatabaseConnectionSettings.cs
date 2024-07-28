@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-
-namespace Wibblr.Metrics.Plugins.Interfaces
+﻿namespace Wibblr.Metrics.Plugins.Interfaces
 {
     public class DatabaseConnectionSettings
     {

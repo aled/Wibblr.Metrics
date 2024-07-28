@@ -1,11 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net.Http;
 using System.Text;
 using System.Text.Json;
-using System.Net.Http;
-using Wibblr.Metrics.Plugins.Interfaces;
+
 using Wibblr.Collections;
+using Wibblr.Metrics.Plugins.Interfaces;
 using Wibblr.Metrics.RestApiModels;
 
 namespace Wibblr.Metrics.Core
@@ -28,7 +29,7 @@ namespace Wibblr.Metrics.Core
 
         public void Send(IEnumerable<T> items)
         {
-            lock(_queueLock)
+            lock (_queueLock)
             {
                 _queue.Enqueue(items);
 

@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+
 using Microsoft.AspNetCore.Mvc;
+
 using Wibblr.Collections;
-using Wibblr.Utils;
 using Wibblr.Metrics.Plugins.Interfaces;
 using Wibblr.Metrics.RestApiModels;
+using Wibblr.Utils;
 
 namespace Wibblr.Metrics.RestApi.Controllers
 {
@@ -22,7 +24,7 @@ namespace Wibblr.Metrics.RestApi.Controllers
 
         [HttpGet]
         [Route("counter")]
-        public ActionResult Counter([FromQuery]string[] name, DateTimeOffset from, DateTimeOffset to, int groupBySeconds)
+        public ActionResult Counter([FromQuery] string[] name, DateTimeOffset from, DateTimeOffset to, int groupBySeconds)
         {
             var groupBy = TimeSpan.FromSeconds(groupBySeconds);
 

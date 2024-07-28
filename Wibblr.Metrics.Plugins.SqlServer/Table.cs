@@ -37,7 +37,7 @@ namespace Wibblr.Metrics.Plugins.SqlServer
             {
                 con.Open();
                 cmd.Connection = con;
-                
+
                 foreach (var p in parameters)
                     cmd.Parameters.Add(p);
 
@@ -58,7 +58,7 @@ namespace Wibblr.Metrics.Plugins.SqlServer
 
         internal void EnsureExists()
         {
-            ExecuteNonQuery($"IF NOT EXISTS(SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @Name AND TABLE_TYPE = 'BASE TABLE')\nCREATE TABLE { Name.SqlQuote()} \n(\n  {string.Join(",\n  ", Columns)},\n  PRIMARY KEY({PrimaryKey})\n);", new SqlParameter("@Name", Name));
+            ExecuteNonQuery($"IF NOT EXISTS(SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE TABLE_NAME = @Name AND TABLE_TYPE = 'BASE TABLE')\nCREATE TABLE {Name.SqlQuote()} \n(\n  {string.Join(",\n  ", Columns)},\n  PRIMARY KEY({PrimaryKey})\n);", new SqlParameter("@Name", Name));
         }
 
         internal void Initialize()
@@ -103,10 +103,10 @@ namespace Wibblr.Metrics.Plugins.SqlServer
                         bc.BatchSize = _writerSettings.BatchSize;
                         bc.BulkCopyTimeout = TIMEOUT_SECONDS;
                         bc.EnableStreaming = false;
-                        
+
                         foreach (var c in _columnsToInsert)
                             bc.ColumnMappings.Add(c, c);
-                        
+
                         bc.WriteToServer(_dataTable);
                     }
                     _dataTable.Clear();
@@ -130,7 +130,7 @@ namespace Wibblr.Metrics.Plugins.SqlServer
                       "select top 10000 countername, [from], sum(count) as count from t " +
                       "group by CounterName, [from] " +
                       "order by CounterName, [from] ";
-            
+
             using (var con = new SqlConnection(_connectionString))
             {
                 con.Open();

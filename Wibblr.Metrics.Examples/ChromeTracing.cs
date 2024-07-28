@@ -1,17 +1,18 @@
 ﻿using System;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Wibblr.Metrics.Core;
 
 namespace Wibblr.Metrics.Examples
 {
     public class ChromeTracing
     {
-        static MetricsCollector metrics;
+        private static MetricsCollector metrics;
 
-        static string time = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
+        private static string time = DateTime.UtcNow.ToString("yyyyMMddHHmmss");
 
-        static void Main(string[] args)
+        private static void Main(string[] args)
         {
             using (metrics = new MetricsCollector(
                 new FileSink(new ChromeTracingSerializer(), new SessionIdNamingStrategy()),
@@ -30,8 +31,8 @@ namespace Wibblr.Metrics.Examples
             }
         }
 
-        void Run(string sessionId)
-        {   
+        private void Run(string sessionId)
+        {
             using (metrics.Profile(sessionId, "block1"))
             {
                 Thread.Sleep(23);
@@ -46,7 +47,7 @@ namespace Wibblr.Metrics.Examples
             }
         }
 
-        static void DoSomeStuff(int i, string sessionId)
+        private static void DoSomeStuff(int i, string sessionId)
         {
             using (metrics.Profile(sessionId, $"DoSomeStuff({i})"))
             {

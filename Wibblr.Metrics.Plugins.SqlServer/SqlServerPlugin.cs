@@ -8,7 +8,7 @@ using Wibblr.Metrics.Plugins.Interfaces;
 namespace Wibblr.Metrics.Plugins.SqlServer
 {
     public class SqlServerPlugin : IDatabasePlugin
-    {        
+    {
         public string Name => "SqlServer";
 
         public string Version => AssemblyName.GetAssemblyName(Assembly.GetExecutingAssembly().Location).Version.ToString();
@@ -33,14 +33,14 @@ namespace Wibblr.Metrics.Plugins.SqlServer
                     new Column("StartTime", "DATETIME2(7)", typeof(DateTime)),
                     new Column("EndTime", "DATETIME2(7)", typeof(DateTime)),
                     new Column("Count", "BIGINT", typeof(long))
-                },         
+                },
                 PrimaryKey = "Id",
             };
 
             histogramTable = new Table(_connectionSettings.ConnectionString, writerSettings)
             {
                 Name = tables.Histogram,
-                    Columns = new List<Column> {
+                Columns = new List<Column> {
                         new Column("Id", "BIGINT", identity: true),
                         new Column("HistogramName", "VARCHAR(8000)", typeof(string)),
                         new Column("StartTime", "DATETIME2(7)", typeof(DateTime)),
@@ -49,24 +49,24 @@ namespace Wibblr.Metrics.Plugins.SqlServer
                         new Column("BucketTo", "INT", typeof(int)),
                         new Column("Count", "BIGINT", typeof(long))
                     },
-                    PrimaryKey = "Id",
-                };
+                PrimaryKey = "Id",
+            };
 
             eventTable = new Table(_connectionSettings.ConnectionString, writerSettings)
             {
                 Name = tables.Event,
-                    Columns = new List<Column> {
+                Columns = new List<Column> {
                         new Column("Id", "BIGINT", identity: true),
                         new Column("EventName", "VARCHAR(8000)", typeof(string)),
                         new Column("Timestamp", "DATETIME2(7)", typeof(DateTime))
                     },
-                    PrimaryKey = "Id",       
-                };
+                PrimaryKey = "Id",
+            };
 
             profileTable = new Table(_connectionSettings.ConnectionString, writerSettings)
             {
                 Name = tables.Profile,
-                    Columns = new List<Column> {
+                Columns = new List<Column> {
                         new Column("Id", "BIGINT", identity: true),
                         new Column("SessionId", "VARCHAR(8000)", typeof(string)),
                         new Column("ProfileName", "VARCHAR(8000)", typeof(string)),
@@ -75,8 +75,8 @@ namespace Wibblr.Metrics.Plugins.SqlServer
                         new Column("Timestamp", "DATETIME2(7)", typeof(DateTime)),
                         new Column("Phase", "CHAR", typeof(string)),
                     },
-                    PrimaryKey = "Id",
-                };
+                PrimaryKey = "Id",
+            };
 
             counterTable.Initialize();
             histogramTable.Initialize();
@@ -87,9 +87,9 @@ namespace Wibblr.Metrics.Plugins.SqlServer
         public void Flush(IEnumerable<WindowedCounter> counters)
         {
             counterTable.Insert(counters.Select(c => new object[] {
-                c.name, 
-                c.from, 
-                c.to, 
+                c.name,
+                c.from,
+                c.to,
                 c.count
             }));
         }
@@ -122,7 +122,7 @@ namespace Wibblr.Metrics.Plugins.SqlServer
                 p.process,
                 p.thread,
                 p.timestamp,
-                p.phase 
+                p.phase
             }));
         }
 

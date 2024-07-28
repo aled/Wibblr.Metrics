@@ -5,7 +5,7 @@ namespace Wibblr.Metrics.Plugins.SqlServer
     public class Column
     {
         public string Name { get; set; }
-        
+
         public string DataType { get; set; }
 
         public Type Type { get; set; }
@@ -30,7 +30,6 @@ namespace Wibblr.Metrics.Plugins.SqlServer
             DataType = dataType;
             Type = type;
         }
-
 
         public override string ToString() =>
             $"{Name} {DataType}{IdentityClause} NOT NULL";

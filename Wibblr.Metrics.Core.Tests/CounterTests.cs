@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
+
 using Xunit;
 
 namespace Wibblr.Metrics.Core.Tests
@@ -35,6 +36,5 @@ namespace Wibblr.Metrics.Core.Tests
             }
             Assert.Equal(100000, sink.Counters.Values.Sum());
         }
-       
     }
 }

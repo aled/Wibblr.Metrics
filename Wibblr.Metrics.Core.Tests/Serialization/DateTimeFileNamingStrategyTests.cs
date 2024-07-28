@@ -1,7 +1,9 @@
 ﻿using System;
 
-using Wibblr.Metrics.Plugins.Interfaces;
 using FluentAssertions;
+
+using Wibblr.Metrics.Plugins.Interfaces;
+
 using Xunit;
 
 namespace Wibblr.Metrics.Core.Tests.Serialization
@@ -16,7 +18,7 @@ namespace Wibblr.Metrics.Core.Tests.Serialization
 
             var dt = new DateTime(2001, 01, 02, 13, 45, 30);
 
-            var counterBasename = s.Basename(new WindowedCounter {name = "a", from = dt, to = dt.AddMinutes(1), count = 1 });
+            var counterBasename = s.Basename(new WindowedCounter { name = "a", from = dt, to = dt.AddMinutes(1), count = 1 });
             counterBasename.Should().Be("counter-20010102-1345");
 
             var eventBasename = s.Basename(new TimestampedEvent { name = "a", timestamp = dt });

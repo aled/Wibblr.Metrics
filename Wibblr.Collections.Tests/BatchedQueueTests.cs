@@ -1,6 +1,9 @@
 ﻿using System.Collections.Generic;
+
 using FluentAssertions;
+
 using Xunit;
+
 using static Wibblr.Collections.Tests.ListBuilder<int>;
 
 namespace Wibblr.Collections.Tests

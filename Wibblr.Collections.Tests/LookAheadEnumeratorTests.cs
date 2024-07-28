@@ -1,6 +1,8 @@
 ﻿using System;
-using Xunit;
+
 using FluentAssertions;
+
+using Xunit;
 
 namespace Wibblr.Collections.Tests
 {

@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reflection;
 
 using Npgsql;
+
 using Wibblr.Metrics.Plugins.Interfaces;
 
 namespace Wibblr.Metrics.Plugins.CockroachDb
@@ -18,7 +19,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
         private Table histogramTable;
         private Table eventTable;
         private Table profileTable;
-       
+
         public string Name => "CockroachDb";
 
         public string Version => AssemblyName.GetAssemblyName(Assembly.GetExecutingAssembly().Location).Version.ToString();
@@ -76,7 +77,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                     new Column{ Name = "EventName", DataType = "VARCHAR(8000)" },
                     new Column{ Name = "Timestamp", DataType = "TIMESTAMP" }
                 },
-                PrimaryKey = "Id",       
+                PrimaryKey = "Id",
             };
 
             profileTable = new Table(_connectionString, databaseName, writerSettings)
@@ -124,7 +125,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                     b.name,
                     b.from,
                     b.to,
-                    b.count 
+                    b.count
                 }));
         }
 
@@ -137,16 +138,16 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                     b.timeTo,
                     b.valueFrom ?? int.MinValue,
                     b.valueTo ?? int.MaxValue,
-                    b.count 
+                    b.count
                 }));
         }
 
         public void Flush(IEnumerable<TimestampedEvent> events)
         {
             eventTable.Insert(
-                events.Select(e => new object[] { 
-                    e.name, 
-                    e.timestamp 
+                events.Select(e => new object[] {
+                    e.name,
+                    e.timestamp
                 }));
         }
 
@@ -159,7 +160,7 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
                         p.process,
                         p.thread,
                         p.timestamp,
-                        p.phase 
+                        p.phase
                 }));
         }
 
@@ -185,4 +186,3 @@ namespace Wibblr.Metrics.Plugins.CockroachDb
         }
     }
 }
-

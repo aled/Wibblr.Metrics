@@ -1,7 +1,7 @@
 ﻿using System;
-using Xunit;
-using FluentAssertions;
 using System.Threading;
+
+using Xunit;
 
 namespace Wibblr.Metrics.Core.Tests
 {

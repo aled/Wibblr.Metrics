@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+
 using Wibblr.Collections;
 using Wibblr.Metrics.Plugins.Interfaces;
 
@@ -99,7 +100,7 @@ namespace Wibblr.Metrics.Core
                 OnCreate(stream);
             else
                 stream.Seek(len, SeekOrigin.Begin);
-            
+
             return stream;
         }
     }

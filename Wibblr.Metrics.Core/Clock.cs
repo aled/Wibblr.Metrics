@@ -29,11 +29,11 @@ namespace Wibblr.Metrics.Core
         }
 
         /// <summary>
-        /// Executes the pre-specified action a delay. The actual delay is 
+        /// Executes the pre-specified action a delay. The actual delay is
         /// calculated so the action executes at the next 'tick'
         /// </summary>
         /// <param name="tickResolution">Tick resolution.</param>
-        public void ExecuteAfterDelay(TimeSpan tickResolution) 
+        public void ExecuteAfterDelay(TimeSpan tickResolution)
         {
             var now = Current;
             var delay = now.RoundUp(tickResolution).Subtract(now).TotalMilliseconds;

@@ -37,13 +37,13 @@ namespace Wibblr.Metrics.Core
             // which exactly matches the number to add. In this case the bucket
             // to use is one higher (because the lower bound of the bucket is inclusive).
             // If negative, bitwise NOT of the search result is the index of the first element
-            // that was larger, or one greater than the length of the array. 
+            // that was larger, or one greater than the length of the array.
             // In this case the bucket to use is the NOT of the search result.
             if (i >= 0)
                 i++;
             else
                 i = ~i;
-            
+
             buckets[i]++;
         }
 
@@ -67,7 +67,7 @@ namespace Wibblr.Metrics.Core
         public float? this[long index]
         {
             get
-            {    
+            {
                 // Use a linear search to find the correct bucket
                 var cumulativeCount = 0L;
                 for (int i = 0; i < buckets.Length; i++)
@@ -111,7 +111,7 @@ namespace Wibblr.Metrics.Core
         {
             long totalCount = buckets.Sum();
             var cumulativeCount = 0f;
-            var ret = new(int, float)[thresholds.Length];
+            var ret = new (int, float)[thresholds.Length];
             for (int i = 0; i < thresholds.Length; i++)
             {
                 cumulativeCount += buckets[i];

@@ -5,7 +5,7 @@ using System.Text;
 namespace Wibblr.Collections
 {
     // Queue that maintains items in batches.
-    // Items may be added to the back of the queue; batches may be taken or 
+    // Items may be added to the back of the queue; batches may be taken or
     // added to the front of the queue.
     // Items will be discarded from the back of the queue if they do not fit.
     public class BatchedQueue<T>
@@ -35,14 +35,14 @@ namespace Wibblr.Collections
                 count++;
                 if (batchList.Count == 0 || batchList.Last.Value.Count >= batchSize)
                     batchList.AddLast(new List<T>());
-                
+
                 batchList.Last.Value.Add(item);
                 return true;
             }
             return false;
         }
 
-        // Enqueue a number of items to the back of the queue. 
+        // Enqueue a number of items to the back of the queue.
         public int Enqueue(IEnumerable<T> items)
         {
             var numItemsAdded = 0;
@@ -56,7 +56,7 @@ namespace Wibblr.Collections
             return numItemsAdded;
         }
 
-        // Add batch to front of queue. If already full, items from the 
+        // Add batch to front of queue. If already full, items from the
         // back of the queue are discarded. The batch may exceed the batch size.
         public void EnqueueToFront(List<T> batch)
         {

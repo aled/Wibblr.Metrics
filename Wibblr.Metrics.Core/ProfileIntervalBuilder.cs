@@ -7,7 +7,7 @@ namespace Wibblr.Metrics.Core
         private MetricsCollector metrics;
         private string sessionId;
         private string name;
-       
+
         internal ProfileIntervalBuilder(MetricsCollector metrics, string sessionId, string name)
         {
             this.metrics = metrics;

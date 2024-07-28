@@ -3,21 +3,21 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 
-using Wibblr.Utils;
 using Wibblr.Metrics.Plugins.Interfaces;
+using Wibblr.Utils;
 
 namespace Wibblr.Metrics.Core
 {
     /// <summary>
     /// Metrics collector. Collects, aggregates and writes incoming
-    /// events to a sink. 
-    /// 
+    /// events to a sink.
+    ///
     /// Events can be counters or histograms.
     /// </summary>
     public sealed class MetricsCollector : IDisposable // 'sealed' allows simple implementation of IDisposable
     {
         private readonly IMetricsSink sink;
-        private readonly IClock clock; 
+        private readonly IClock clock;
 
         private readonly Dictionary<Metric, long> counters = new Dictionary<Metric, long>();
         private readonly object countersLock = new object();
@@ -58,7 +58,7 @@ namespace Wibblr.Metrics.Core
 
             if (!windowSize.IsDivisorOf(TimeSpan.FromDays(1)))
                 throw new ArgumentException("Must be whole number of windows per day", nameof(windowSize));
-  
+
             this.sink = sink;
             this.clock = clock;
             this.windowSize = windowSize;
@@ -84,7 +84,8 @@ namespace Wibblr.Metrics.Core
             : this(sink,
                    TimeSpan.ParseExact(settings.WindowSize, "h\\:mm\\:ss", CultureInfo.InvariantCulture),
                    TimeSpan.ParseExact(settings.FlushInterval, "h\\:mm\\:ss", CultureInfo.InvariantCulture),
-                   settings.IgnoreEmptyBuckets) { }
+                   settings.IgnoreEmptyBuckets)
+        { }
 
         /// <summary>
         /// Initializes a new instance of the <see cref="T:Wibblr.Metrics.Core.CounterCollector"/> class.
@@ -94,21 +95,20 @@ namespace Wibblr.Metrics.Core
         public MetricsCollector(IMetricsSink sink)
             : this(sink, new Clock(), TimeSpan.FromSeconds(60), TimeSpan.FromSeconds(60), false) { }
 
-
         private bool ValidateName(string name, out string message)
         {
             message = null;
-         
+
             if (name == null)
                 message = "Invalid name";
-
             else if (name.Length > 1000)
                 message = "Name too long";
-            
+
             return message == null;
         }
 
         #region Counters
+
         /// <summary>
         /// Increments a counter.
         /// </summary>
@@ -140,9 +140,11 @@ namespace Wibblr.Metrics.Core
                 Console.Error.WriteLine(e.Message);
             }
         }
+
         #endregion Counters
 
         #region Histograms
+
         public void RegisterThresholds(string histogramName, int[] thresholds)
         {
             thresholdDict[histogramName] = thresholds;
@@ -178,11 +180,13 @@ namespace Wibblr.Metrics.Core
                 Console.Error.WriteLine(e.Message);
             }
         }
+
         #endregion Histograms
 
         #region Events
+
         private static readonly int[] precisionTicks = new[] { 10000000, 1000000, 100000, 10000, 1000, 100, 10, 1 };
-     
+
         public void Event(string name, int precision = 3)
         {
             if (!ValidateName(name, out var message))
@@ -217,9 +221,11 @@ namespace Wibblr.Metrics.Core
                 Console.Error.WriteLine(e.Message);
             }
         }
+
         #endregion Events
 
         #region Profile
+
         /// <summary>
         /// Used to profile a block of code (by putting it in a 'using' statement)
         /// </summary>
@@ -238,7 +244,7 @@ namespace Wibblr.Metrics.Core
             lock (profileLock)
             {
                 profileData.Add(new Profile(sessionId, name, clock.Current, 'B'));
-            } 
+            }
         }
 
         /// <summary>
@@ -251,7 +257,7 @@ namespace Wibblr.Metrics.Core
             lock (profileLock)
             {
                 profileData.Add(new Profile(sessionId, name, clock.Current, 'E'));
-            } 
+            }
         }
 
         public void ProfileEvent(string sessionId, string name)
@@ -259,10 +265,10 @@ namespace Wibblr.Metrics.Core
             lock (profileLock)
             {
                 profileData.Add(new Profile(sessionId, name, clock.Current, 'i'));
-            
             }
         }
-        #endregion Profiler
+
+        #endregion Profile
 
         /// <summary>
         /// Flush this instance.
@@ -285,7 +291,7 @@ namespace Wibblr.Metrics.Core
                 {
                     foreach (var c in counters.Keys.ToList())
                     {
-                        // Only take counts before the current timeperiod (unless 
+                        // Only take counts before the current timeperiod (unless
                         // the delayedAction is cancelled, i.e. there will be no more flushes),
                         // so that each counter is only written once for each window.
                         if (isFlushCancelled || c.from < currentTimePeriodStart)
@@ -379,7 +385,7 @@ namespace Wibblr.Metrics.Core
             try
             {
                 // this will have no effect if the clock is in the process of cancelling
-                clock.ExecuteAfterDelay(flushInterval); 
+                clock.ExecuteAfterDelay(flushInterval);
             }
             catch (Exception e)
             {
@@ -390,7 +396,7 @@ namespace Wibblr.Metrics.Core
         /// <summary>
         /// Releases all resource used by the <see cref="T:Wibblr.Metrics.Core.EventCollector"/> object.
         /// </summary>
-        public void Dispose() 
+        public void Dispose()
         {
             clock.CancelDelayedAction();
             Flush();
